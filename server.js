@@ -1,49 +1,33 @@
 console.log("Hello RWNC");
-var http = require('http');
-var dispatcher = require('httpdispatcher');
-const PORT = 8080;
-dispatcher.setStatic('resources');
+var express = require('express');
+var app = new express();
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 var dbUtil = require('./db-util');
-var mysql = require('mysql');
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root12345',
-    database: 'rwncv1'
-});
+
 //server
-var server = http.createServer(handleRequest);
-server.listen(PORT, function() {
-    //Callback triggered when server is successfully listening. Hurray!
-    console.log("Server listening on: http://localhost:%s", PORT);
+var server = app.listen(3000, function () {
+  var host = server.address().address;
+  var port = server.address().port;
+  console.log('RWNC API listening at http://%s:%s', host, port);
 });
-// request handler
-function handleRequest(request, response) {
-    try {
-        console.log(request.url);
-        dispatcher.dispatch(request, response);
-    } catch (err) {
-        console.log(err);
-    }
-}
-// user get
-dispatcher.onGet("/users", function(req, res) {
-    res.writeHead(200, {
-        'Content-Type': 'text/plain'
-    });
-    var result = [];
-    dbUtil.getUsers().then(function(users) {
-        res.end((JSON.stringify(users)).toString());
+
+//requests
+
+// get all users
+app.get('/users', function (req, res) {
+dbUtil.getUsers().then(function(users) {
+        res.send((JSON.stringify(users)).toString());
     })
 });
-// user post
-dispatcher.onPost("/user", function(req, res) {
-    res.writeHead(200, {
-        'Content-Type': 'application/json'
-    });
-    var body = JSON.parse(req.body);
+
+// post a new user
+// use data {"name":"***", "password":"***"}
+app.post('/user', function (req, res) {
+    var body = req.body;
     dbUtil.putUser(body).then(function(id) {
-        res.end((JSON.stringify(id)).toString());
-    })
-    console.log(body);
+	    console.log(id);
+	    res.send((JSON.stringify(id)).toString());
+    });
 });
