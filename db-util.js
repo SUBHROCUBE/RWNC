@@ -26,7 +26,7 @@ exports.getUsers = function() {
 exports.putUser = function(data) {
     var deffered = q.defer();
     var result;
-    connection.query('insert into user (user_name,user_pwd) values("' + data.name + '","' + data.pwd + '")', function(err, rows, fields) {
+    connection.query('insert into user (user_name,user_pwd) values("' + data.name + '","' + data.password + '")', function(err, rows, fields) {
         if (!err) {
 	    deffered.resolve('posted');
         } else {
