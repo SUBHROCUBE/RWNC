@@ -6,6 +6,7 @@ var connection = mysql.createConnection({
     password: 'root12345',
     database: 'rwncv1'
 });
+// get all user names
 exports.getUsers = function() {
     var deffered = q.defer();
     var users = [];
@@ -15,13 +16,14 @@ exports.getUsers = function() {
             rows.forEach(function(row) {
                 users.push(row.user_name);
             });
-            deffered.resolve(users)
+            deffered.resolve(users);
         } else {
             console.log('Error while performing Query : get all users.');
         }
     });
     return deffered.promise;
 };
+// insert a new user
 exports.putUser = function(data) {
     var deffered = q.defer();
     var result;
@@ -34,6 +36,7 @@ exports.putUser = function(data) {
     });
     return deffered.promise;
 };
+// validate existence of an user in system with username and password
 exports.validateUser = function(data) {
     var deffered = q.defer();
     var result;
@@ -50,6 +53,7 @@ exports.validateUser = function(data) {
     });
     return deffered.promise;
 };
+// fetch authorization of a given user
 exports.getAuthorization = function(user_id) {
     var deffered = q.defer();
     var result;
@@ -66,6 +70,7 @@ exports.getAuthorization = function(user_id) {
     });
     return deffered.promise;
 };
+// fetch top 10 recent orders 
 exports.getRecentOrders = function() {
     var deffered = q.defer();
     var result;
@@ -82,6 +87,7 @@ exports.getRecentOrders = function() {
     });
     return deffered.promise;
 };
+// fetch top 10 recent receivables
 exports.getRecentReceived = function() {
     var deffered = q.defer();
     var result;
@@ -98,6 +104,7 @@ exports.getRecentReceived = function() {
     });
     return deffered.promise;
 };
+// fetch top 10 recent deliveries
 exports.getRecentDeliveries = function() {
     var deffered = q.defer();
     var result;
@@ -114,6 +121,7 @@ exports.getRecentDeliveries = function() {
     });
     return deffered.promise;
 };
+// fetch top 10 recent low stocks
 exports.getRecentLowStocks = function() {
     var deffered = q.defer();
     var result;
@@ -126,6 +134,43 @@ exports.getRecentLowStocks = function() {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent low stocks.');
+        }
+    });
+    return deffered.promise;
+};
+// fetch all customers
+exports.getAllCustomers = function() {
+    var deffered = q.defer();
+    var result;
+    connection.query('select * from customer', function(err, rows, fields) {
+        if (!err) {
+            var returnData = [];
+            rows.forEach(function(row) {
+                returnData.push(row);
+            });
+            deffered.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : get all customers.');
+        }
+    });
+    return deffered.promise;
+};
+// insert a new customer
+exports.postCustomer = function(user_id, data) {
+    var deffered = q.defer();
+    var returnData = {};
+    var query = 'insert into customer (alias, name, spoc, contact1, contact2, address, email1, email2, vat_no, cst_no, status, cb) values (?,?,?,?,?,?,?,?,?,?,?,?)';
+console.log(data);
+    var inserts = [data["Alias"], data["Name"], data["SPOC Name"], data["Contact 1"], data["Contact 2"], data["Address"], data["Email 1"], data["Email 2"], data["VAT No."], data["CST No."], 'active', user_id];
+    query = mysql.format(query, inserts);
+    console.log(query)
+    connection.query(query, function(err, result) {
+        if (!err) {
+            console.log(result.insertId);
+            returnData["Customer ID"] = result.insertId;
+            deffered.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : get all customers.');
         }
     });
     return deffered.promise;
