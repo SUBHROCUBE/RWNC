@@ -1,0 +1,31 @@
+{
+  "name": "rwnc",
+  "version": "1.0.0",
+  "description": "rwnc project",
+  "main": "server.js",
+  "dependencies": {
+    "mysql": "^2.7.0"
+  },
+  "devDependencies": {
+    "express": "^4.13.0",
+    "mysql": "^2.7.0",
+    "passport": "^0.2.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SUBHROCUBE/RWNC.git"
+  },
+  "keywords": [
+    "rwnc"
+  ],
+  "author": "jagdeep",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SUBHROCUBE/RWNC/issues"
+  },
+  "homepage": "https://github.com/SUBHROCUBE/RWNC#readme"
+}
