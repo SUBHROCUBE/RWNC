@@ -20,12 +20,12 @@ CREATE TABLE access (
 	PRIMARY KEY(access_id)
 );
 
-insert into access (access_name) values('home_view');
 insert into access (access_name) values('stock_view');
 insert into access (access_name) values('stock_edit');
 insert into access (access_name) values('customer_add');
 insert into access (access_name) values('customer_view');
 insert into access (access_name) values('customer_edit');
+insert into access (access_name) values('home_view');
 
 DROP TABLE IF EXISTS permission;
 CREATE TABLE permission (
@@ -41,6 +41,7 @@ insert into permission (user_id,access_id) values(1,2);
 insert into permission (user_id,access_id) values(1,3);
 insert into permission (user_id,access_id) values(1,4);
 insert into permission (user_id,access_id) values(1,5);
+insert into permission (user_id,access_id) values(1,6);
 insert into permission (user_id,access_id) values(2,3);
 insert into permission (user_id,access_id) values(2,4);
 
@@ -201,6 +202,8 @@ CREATE TABLE orders (
 	customer_id	int(20),
 	item_id	int(20),
 	quantity	int(20),
+	quantity_completed	int(20) DEFAULT 0,
+	quantity_in_production	int(20) DEFAULT 0,
 	weight	NUMERIC(20,2),
 	rate	NUMERIC(20,2),
 	order_date	DATETIME,
@@ -261,6 +264,29 @@ CREATE TABLE production (
 insert into production (order_id,expected_end_date,start_date,end_date,pm,dice,machine,status,cb) values(1,'2015-06-10 00:00:00','2015-06-01 00:00:00','2015-06-09 00:00:00','EMP004','DICE001','MACHINE003','COMPLETED',1);
 insert into production (order_id,expected_end_date,start_date,pm,dice,machine,status,cb) values(2,'2015-06-27 00:00:00','2015-06-12 00:00:00','EMP004','DICE007','MACHINE003','STARTED',1);
 insert into production (order_id,expected_end_date,start_date,pm,dice,machine,status,cb) values(3,'2015-07-01 00:00:00','2015-06-14 00:00:00','EMP004','DICE009','MACHINE004','STARTED',1);
+
+DROP TABLE IF EXISTS production_item_used;
+CREATE TABLE production_item_used (
+	production_item_used_id	int(20) auto_increment,
+	production_id	int(20),
+	item_id	int(20),
+	quantity	int(20) DEFAULT 0,
+	weight	NUMERIC(20,2) DEFAULT 0,
+	co	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	cb	int(20) ,
+	uo	TIMESTAMP ,
+	ub	int(20) ,
+	PRIMARY KEY(production_item_used_id),
+	FOREIGN KEY (production_id) REFERENCES production (production_id),
+	FOREIGN KEY (item_id) REFERENCES item (item_id)
+);
+
+
+insert into production_item_used (production_id,item_id,quantity,cb) values(1,1,150,1);
+insert into production_item_used (production_id,item_id,quantity,cb) values(2,1,100,1);
+insert into production_item_used (production_id,item_id,quantity,cb) values(2,2,80,1);
+insert into production_item_used (production_id,item_id,quantity,cb) values(3,3,800,1);
+
 
 DROP TABLE IF EXISTS login;
 CREATE TABLE login (
