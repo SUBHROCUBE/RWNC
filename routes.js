@@ -33,7 +33,11 @@ module.exports = function(app) {
 		res.send(req.isAuthenticated() ? req.user : '0');
 	});
 
-
+    app.get('/users', function(req, res) {
+            dbUtil.getUsers().then(function(users) {
+                res.send((JSON.stringify(users)).toString());
+            })
+});
 	
 	app.get('/logout', function(req, res){
 		req.logOut();
