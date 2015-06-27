@@ -15,6 +15,7 @@ var auth = require('basic-auth');
 // messages
 var msg1 = "Authentication Error. Invalid login credentials.";
 var msg2 = "Authorization Error. Access to this page forbidden.";
+var msg3 = "Invalid parameters or request body ";
 
 //server
 var server = app.listen(3000, function() {
@@ -225,7 +226,100 @@ app.post('/customer', function(req, res) {
                 if (authorizations.indexOf("customer_add") > -1) {
                     var customer_details = req.body;
                     console.log(customer_details["Alias"]);
-                    dbUtil.postCustomer(user_id, customer_details).then(function(data) {
+                    dbUtil.insertCustomer(user_id, customer_details).then(function(data) {
+                        if (data != null) {
+                            res.statusCode = 200;
+                            res.send(data);
+                        }
+                    });
+                } else {
+                    res.statusCode = 403;
+                    res.send((JSON.stringify(msg2)).toString());
+                }
+            });
+        }
+    });
+});
+
+
+// POST a new customer details
+// use header in format          credentials = {"username":"***", "userpwd":"***"}
+// use content-type 		 Application/json
+// use body in format 
+//	{
+//		"Customer ID":"1",
+//      "Alias":"Banaraswala",
+//      "Name":"G.K.Tiwari",
+//      "SPOC Name":"Hemant",
+//      "Contact 1":"9999999999",
+//      "Contact 2":null,
+//      "Address":null,
+//      "Email 1":"xxxxx@gmail.com",
+//      "Email 2":null,
+//      "VAT No.":"VAT001",
+//      "CST No.":"CST001"
+//	}
+app.put('/customer', function(req, res) {
+    var credentials = JSON.parse(req.headers['credentials']);
+    dbUtil.validateUser(credentials).then(function(user_id) {
+        if (user_id == "-1") {
+            res.statusCode = 401;
+            res.send((JSON.stringify(msg1)).toString());
+        } else {
+            dbUtil.getAuthorization(user_id).then(function(authorizations) {
+                if (authorizations.indexOf("customer_add") > -1) {
+                    var customer_details = req.body;
+                    var id = customer_details["Customer ID"];
+					if (id==null)
+					{
+						res.statusCode = 404;
+						res.send((JSON.stringify(msg3)).toString());
+					}
+					else
+					{
+						dbUtil.updateCustomer(user_id, customer_details).then(function(data) {
+							if (data != null) {
+								res.statusCode = 200;
+								res.send(data);
+							}
+						});
+					}
+                } else {
+                    res.statusCode = 403;
+                    res.send((JSON.stringify(msg2)).toString());
+                }
+            });
+        }
+    });
+});
+
+// POST a new Received details
+// use header in format          credentials = {"username":"***", "userpwd":"***"}
+// use content-type 		 Application/json
+// use body in format 
+//	{
+//      "Alias":"Banaraswala",
+//      "Name":"G.K.Tiwari",
+//      "SPOC Name":"Hemant",
+//      "Contact 1":"9999999999",
+//      "Contact 2":null,
+//      "Address":null,
+//      "Email 1":"xxxxx@gmail.com",
+//      "Email 2":null,
+//      "VAT No.":"VAT001",
+//      "CST No.":"CST001"
+//	}
+app.post('/received', function(req, res) {
+    var credentials = JSON.parse(req.headers['credentials']);
+    dbUtil.validateUser(credentials).then(function(user_id) {
+        if (user_id == "-1") {
+            res.statusCode = 401;
+            res.send((JSON.stringify(msg1)).toString());
+        } else {
+            dbUtil.getAuthorization(user_id).then(function(authorizations) {
+                if (authorizations.indexOf("received_add") > -1) {
+                    var received_details = req.body;
+                    dbUtil.insertReceived(user_id, received_details).then(function(data) {
                         if (data != null) {
                             res.statusCode = 200;
                             res.send(data);
