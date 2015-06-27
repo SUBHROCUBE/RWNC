@@ -3,7 +3,7 @@ var q = require('q');
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'admin',
+    password: '',
     database: 'rwncv1'
 });
 // get all user names
@@ -224,7 +224,8 @@ checkDuplicateItem = function (itemToCheck) {
 			return -1;
             console.log('Error while performing Query : itemToCheck.');
         }
-	}
+	})
+}
 }
 // insert a new item
 insertItem = function(user_id, data) {
