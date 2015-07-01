@@ -3,7 +3,7 @@ var q = require('q');
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'rwnc123',
     database: 'rwncv1'
 });
 // get all user names
