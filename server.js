@@ -4,6 +4,7 @@ bodyParser = require('body-parser'),
 cookieParser = require('cookie-parser'),
 session = require('express-session'),
 passport = require('passport'),
+cors = require('cors'),
 hbs = require('hbs');
 var app = express(),
     flash = require('connect-flash');
@@ -18,7 +19,7 @@ var server = require('http').Server(app);
 	app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 	app.use(bodyParser.json())
- 
+ 	app.use(cors());
   app.use(session({ secret: 'keyboard cat',key: "sessionId", proxy:true, cookie: { maxAge: 600000, secure: false, httpOnly: true }}));
   app.use(flash());
   // Initialize Passport!  Also use passport.session() middleware, to support

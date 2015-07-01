@@ -4,6 +4,7 @@
   "description": "rwnc project",
   "main": "server.js",
   "dependencies": {
+    "cors": "^2.7.1",
     "mysql": "^2.7.0"
   },
   "devDependencies": {

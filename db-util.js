@@ -19,6 +19,7 @@ exports.getUsers = function() {
             deffered.resolve(users);
         } else {
             console.log('Error while performing Query : get all users.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -32,6 +33,7 @@ exports.putUser = function(data) {
             deffered.resolve('posted');
         } else {
             console.log('Error while performing Query : put user.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -49,6 +51,7 @@ exports.validateUser = function(data) {
             deffered.resolve(user_id);
         } else {
             console.log('Error while performing Query : validate user.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -66,6 +69,7 @@ exports.getAuthorization = function(user_id) {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : authorize user.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -83,6 +87,7 @@ exports.getRecentOrders = function() {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent orders.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -100,6 +105,7 @@ exports.getRecentReceived = function() {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent received.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -117,6 +123,7 @@ exports.getRecentDeliveries = function() {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent deliveries.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -134,6 +141,7 @@ exports.getRecentLowStocks = function() {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent low stocks.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -151,6 +159,7 @@ exports.getAllCustomers = function() {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : get all customers.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -171,6 +180,7 @@ console.log(data);
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : add customer.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -190,6 +200,7 @@ exports.updateCustomer = function(user_id, data) {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : update customer.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
@@ -240,6 +251,7 @@ insertItem = function(user_id, data) {
             returnData["Item ID"] = result.insertId;
         } else {
             console.log('Error while performing Query : add item.');
+            deffered.reject(err)
         }
     });
     return returnData;
@@ -265,6 +277,7 @@ exports.insertReceived = function(user_id, data) {
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : add received.');
+            deffered.reject(err)
         }
     });
     return deffered.promise;
