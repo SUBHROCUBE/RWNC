@@ -40,6 +40,7 @@ exports.putUser = function(data) {
 };
 // validate existence of an user in system with username and password
 exports.validateUser = function(data) {
+    console.log("\n\nhellloo");
     var deffered = q.defer();
     var result;
     connection.query('select user_id from user where user_name = "' + data.username + '" and user_pwd = "' + data.userpwd + '"', function(err, rows, fields) {
@@ -169,14 +170,14 @@ exports.insertCustomer = function(user_id, data) {
     var deffered = q.defer();
     var returnData = {};
     var query = 'insert into customer (alias, name, spoc, contact1, contact2, address, email1, email2, vat_no, cst_no, status, cb) values (?,?,?,?,?,?,?,?,?,?,?,?)';
-console.log(data);
-    var inserts = [data["Alias"], data["Name"], data["SPOC Name"], data["Contact 1"], data["Contact 2"], data["Address"], data["Email 1"], data["Email 2"], data["VAT No."], data["CST No."], 'active', user_id];
+    console.log(data);
+    var inserts = [data["alias"], data["name"], data["spocName"], data["contact1"], data["contact2"], data["address"], data["email1"], data["email2"], data["vatNo"], data["cstNo"], 'active', user_id];
     query = mysql.format(query, inserts);
     console.log(query)
     connection.query(query, function(err, result) {
         if (!err) {
             console.log(result.insertId);
-            returnData["Customer ID"] = result.insertId;
+            returnData["id"] = result.insertId;
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : add customer.');
@@ -190,7 +191,7 @@ exports.updateCustomer = function(user_id, data) {
     var deffered = q.defer();
     var returnData = {};
     var query = 'update customer set alias = ?, name=?, spoc=?, contact1=?, contact2=?, address=?, email1=?, email2=?, vat_no=?, cst_no=?, ub = ?, uo=now() where customer_id=?';
-    var updates = [data["Alias"], data["Name"], data["SPOC Name"], data["Contact 1"], data["Contact 2"], data["Address"], data["Email 1"], data["Email 2"], data["VAT No."], data["CST No."], user_id, data["Customer ID"]];
+    var updates = [data["alias"], data["name"], data["spocName"], data["contact1"], data["contact2"], data["address"], data["email1"], data["email2"], data["vatNo"], data["cstNo"], user_id, data["id"]];
     query = mysql.format(query, updates);
     console.log(query);
     connection.query(query, function(err, result) {
@@ -205,50 +206,54 @@ exports.updateCustomer = function(user_id, data) {
     });
     return deffered.promise;
 };
-checkDuplicateItem = function (itemToCheck) {
-	var raw_ready=itemToCheck["Raw/Ready"];
-	var material=itemToCheck["Material"];
-	var type=itemToCheck["Type"];
-	var diameter=itemToCheck["Diameter"];
-	if (diameter == null)
-	{
-		diameter=0;
-	}
-	if (raw_ready=="raw")
-	{
-		var query = 'select * from item where raw_ready=? and  material=? and type=? and diameter=?';
-		var inserts = [raw_ready, material, type, diameter];
-		query = mysql.format(query, inserts);
-		connection.query(query, function(err, rows, fields) {
-        if (!err) {
-            var returnData = [];
-            rows.forEach(function(row) {
-                returnData.push(row);
-            });
-			if (returnData.size == 1) {
-				return returnData[0].item_id;
-			} else {
-				console.log('Error while performing Query : itemToCheck : multiple rows returned');
-				return -1;
-			}
-        } else {
-			return -1;
-            console.log('Error while performing Query : itemToCheck.');
+checkDuplicateItem = function(itemToCheck) {
+        var raw_ready = itemToCheck["itemRawReady"];
+        var material = itemToCheck["itemMaterial"];
+        var type = itemToCheck["itemType"];
+        var diameter = itemToCheck["itemDiameter"];
+        if (diameter == null) {
+            diameter = 0;
         }
-	})
-}
-}
+        if (raw_ready == "raw") {
+            var query = 'select * from item where raw_ready=? and  material=? and type=? and diameter=?';
+            var inserts = [raw_ready, material, type, diameter];
+            query = mysql.format(query, inserts);
+	    console.log(query);
+            connection.query(query, function(err, rows, fields) {
+                if (!err) {
+                    var returnData = [];
+                    rows.forEach(function(row) {
+                        returnData.push(row);
+                    });
+                    if (returnData.size == 1) {
+			console.log('Item found : itemToCheck : single row returned');
+                        return returnData[0].item_id;
+                    } else if (returnData.size > 1) {
+                        console.log('Error while performing Query : itemToCheck : multiple rows returned');
+                        return returnData[0].item_id;
+                    } else {
+                        console.log('Item not found : itemToCheck');
+                        return -1;
+                    }
+                } else {
+                    console.log('Error while performing Query : itemToCheck.');
+                    return -1;
+                }
+            })
+        }
+    }
+
 // insert a new item
 insertItem = function(user_id, data) {
     var returnData = {};
     var query = 'insert into item (opening, diameter, length, width, type, material, raw_ready, description, is_clamp, c_pos, c_length, c_thickness, c_desc, threshold, cb) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-    var inserts = [data["Opening"], data["Diameter"], data["Length"], data["Width"], data["Type"], data["Material"], data["Raw/Ready"], data["Description"], data["Clamped"], data["Clamp Position"], data["Clamp Length"], data["Clamp Thickness"], data["Clamp Description"], data["Threshold"], user_id];
+    var inserts = [data["itemOpening"], data["itemDiameter"], data["itemLength"], data["itemWidth"], data["itemType"], data["itemMaterial"], data["itemRawReady"], data["itemDescription"], data["itemClamped"], data["itemClampPosition"], data["itemClampLength"], data["itemClampThickness"], data["itemClampDescription"], data["itemThreshold"], user_id];
     query = mysql.format(query, inserts);
-    console.log(query)
+    console.log(query);
     connection.query(query, function(err, result) {
         if (!err) {
             console.log(result.insertId);
-            returnData["Item ID"] = result.insertId;
+            returnData["itemID"] = result.insertId;
         } else {
             console.log('Error while performing Query : add item.');
             deffered.reject(err)
@@ -256,24 +261,26 @@ insertItem = function(user_id, data) {
     });
     return returnData;
 };
+
 // insert a new received
 exports.insertReceived = function(user_id, data) {
     var deffered = q.defer();
     var returnData = {};
-	var item_id = checkDuplicateItem(data);
-	if (-1==item_id)
-	{
-		var item=insertItem(user_id, data);
-		item_id=item["Item ID"];
-	}
-    var query = 'insert into received (customer_id, item_id, quantity, weight, received_date, cb) values (?,?,?,?,?,?)';
-    var inserts = [data["Customer ID"], item_id, data["Quantity"], data["Weight"], data["Received Date"], user_id];
+    var item_id = checkDuplicateItem(data);
+console.log("item id is "+item_id);
+    if (-1 == item_id) {
+console.log("go to insertitem");
+        var item = insertItem(user_id, data);
+        item_id = item["itemId"];
+    }
+    var query = 'insert into received (customer_id, item_id, quantity, weight, received_date, cb) values (?,?,?,?, now(),?)';
+    var inserts = [data["customerId"], item_id, data["receivedQuantity"], data["receivedWeight"], user_id];
     query = mysql.format(query, inserts);
-    console.log(query)
+    console.log(query);
     connection.query(query, function(err, result) {
         if (!err) {
             console.log(result.insertId);
-            returnData["Received ID"] = result.insertId;
+            returnData["receivedId"] = result.insertId;
             deffered.resolve(returnData);
         } else {
             console.log('Error while performing Query : add received.');
