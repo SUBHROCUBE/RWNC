@@ -7,7 +7,11 @@ exports.getRecentLowStocks = function(data) {
         datum["itemMaterial"] = obj.material;
         datum["itemDescription"] = obj.description;
 	datum["itemType"] = obj.type;
-        datum["stockAmount"] = obj.quantity + "/" + obj.weight;
+	datum["itemDiameter"] = obj.diameter;
+	if (obj.weight != null && obj.weight!=0)
+        	datum["stockAmount"] = obj.weight;
+	else
+		datum["stockAmount"] = obj.quantity;
         returnData.push(datum);
     });
     return returnData;
@@ -25,8 +29,13 @@ exports.getRecentOrders = function(data) {
         datum["itemDescription"] = obj.description;
 	datum["itemType"] = obj.type;
         datum["orderID"] = obj.order_id;
-        datum["orderAmount"] = obj.quantity + "/" + obj.weight;
+	if (obj.weight != null && obj.weight!=0)
+        	datum["orderAmount"] = obj.weight;
+	else
+		datum["orderAmount"] = obj.quantity;
         datum["orderDate"] = obj.order_date;
+	datum["deliveryDate"] = obj.delivery_date;
+	datum["orderStatus"] = obj.status;
         returnData.push(datum);
     });
     return returnData;
@@ -44,7 +53,10 @@ exports.getRecentDeliveries = function(data) {
         datum["itemDescription"] = obj.description;
 	datum["itemType"] = obj.type;
         datum["orderId"] = obj.order_id;
-        datum["orderAmount"] = obj.quantity + "/" + obj.weight;
+	if (obj.weight != null && obj.weight!=0)
+        	datum["orderAmount"] = obj.weight;
+	else
+		datum["orderAmount"] = obj.quantity;
         datum["orderDate"] = obj.order_date;
 	datum["deliveryId"] = obj.delivery_id;
 	datum["deliveryDate"] = obj.delivery_date;
@@ -67,8 +79,13 @@ exports.getRecentReceived = function(data) {
         datum["itemMaterial"] = obj.material;
         datum["itemDescription"] = obj.description;
 	datum["itemType"] = obj.type;
+	if (obj.diameter != null && obj.diameter !=0)
+		datum["itemType"] = datum["itemType"]+ "("+obj.diameter+")";
         datum["receivedId"] = obj.received_id;
-        datum["receivedAmount"] = obj.quantity + "/" + obj.weight;
+	if (obj.weight != null && obj.weight!=0)
+        	datum["receivedAmount"] = obj.weight;
+	else
+		datum["receivedAmount"] = obj.quantity;
         datum["receivedDate"] = obj.received_date;
         returnData.push(datum);
     });
