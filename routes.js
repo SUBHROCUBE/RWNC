@@ -1,8 +1,9 @@
 var path = require('path'),
-    pass = require('./passport-util'),
+    pass = require('./passport-util')
     passport = require('passport'),
     session = require('./session');
 var modelutil = require('./model-util');
+var dbUtil = require('./db-util');
 var ExpressBrute = require('express-brute');
 
 var store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production 
@@ -192,5 +193,39 @@ module.exports = function(app) {
         req.logOut();
         res.redirect('/rwnc');
     });
+
+    // POST filters to receive stock details
+    // use content-type 		 Application/json
+    app.post('/stock', function(req, res) {
+        var stockFilterModel = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+
+	modelutil.stockFilterModelToDB(stockFilterModel).then(function (stockFilterDB){
+		if (stockFilterModel.hasOwnProperty('customerId')){
+console.log(stockFilterDB);
+			dbUtil.fetchCustomerDeposit(stockFilterDB).then(function(data){
+				var depositModel=modelutil.getDeposit(data);
+				res.statusCode = 200;
+				res.send(depositModel);
+			}, function(err) {
+		    		res.send(err);
+			});
+		} else {
+			dbUtil.fetchRwncStock(stockFilterModel).then(function(data){
+				var stockModel=modelutil.getStock(data);
+				res.statusCode = 200;
+				res.send(stockModel);
+			}, function(err) {
+		    		res.send(err);
+			});
+		}
+	});
+    });
+
+    app.get('/logout', function(req, res) {
+        req.logOut();
+        res.redirect('/rwnc');
+    });
+
 
 };
