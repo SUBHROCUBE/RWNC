@@ -79,7 +79,7 @@ exports.getAuthorization = function(user_id) {
 exports.getRecentOrders = function() {
     var deffered = q.defer();
     var result;
-    connection.query('select * from orders, item, customer where orders.item_id = item.item_id and orders.customer_id = customer.customer_id order by order_date desc limit 10', function(err, rows, fields) {
+    connection.query('select * from orders, item, customer where orders.item_id = item.item_id and orders.customer_id = customer.customer_id order by order_date desc limit 5', function(err, rows, fields) {
         if (!err) {
             var returnData = [];
             rows.forEach(function(row) {
@@ -97,7 +97,7 @@ exports.getRecentOrders = function() {
 exports.getRecentReceived = function() {
     var deffered = q.defer();
     var result;
-    connection.query('select * from received, item, customer where received.item_id = item.item_id and received.customer_id = customer.customer_id order by received_date desc limit 10', function(err, rows, fields) {
+    connection.query('select * from received, item, customer where received.item_id = item.item_id and received.customer_id = customer.customer_id and lower(raw_ready)= "raw" order by received_date desc limit 5', function(err, rows, fields) {
         if (!err) {
             var returnData = [];
             rows.forEach(function(row) {
@@ -115,7 +115,7 @@ exports.getRecentReceived = function() {
 exports.getRecentDeliveries = function() {
     var deffered = q.defer();
     var result;
-    connection.query('select * from delivery, orders, item, customer where delivery.order_id = orders.order_id and orders.item_id = item.item_id and orders.customer_id = customer.customer_id order by order_date desc limit 10', function(err, rows, fields) {
+    connection.query('select * from delivery, orders, item, customer where delivery.order_id = orders.order_id and orders.item_id = item.item_id and orders.customer_id = customer.customer_id order by order_date desc limit 5', function(err, rows, fields) {
         if (!err) {
             var returnData = [];
             rows.forEach(function(row) {
@@ -133,7 +133,7 @@ exports.getRecentDeliveries = function() {
 exports.getRecentLowStocks = function() {
     var deffered = q.defer();
     var result;
-    connection.query('select * from stock, item where stock.item_id = item.item_id and (quantity<threshold or weight<threshold) order by stock.uo desc', function(err, rows, fields) {
+    connection.query('select * from stock, item where stock.item_id = item.item_id and (quantity<threshold or weight<threshold) and lower(raw_ready)= "raw" order by stock.uo desc', function(err, rows, fields) {
         if (!err) {
             var returnData = [];
             rows.forEach(function(row) {
@@ -285,6 +285,54 @@ console.log("go to insertitem");
         } else {
             console.log('Error while performing Query : add received.');
             deffered.reject(err)
+        }
+    });
+    return deffered.promise;
+};
+
+// fetch customer deposit based upon passed filters
+exports.fetchCustomerDeposit = function(stockFilterDB) {
+    var deffered = q.defer();
+    var result;
+    var queryString = 'select * from deposit, item, customer where deposit.item_id = item.item_id and deposit.customer_id = customer.customer_id';	
+    if (stockFilterDB != null && stockFilterDB.length > 0){
+	queryString = queryString + " and " + stockFilterDB.join(" and ");
+    }
+    console.log(queryString);	
+    connection.query(queryString, function(err, rows, fields) {
+        if (!err) {
+            var returnData = [];
+            rows.forEach(function(row) {
+                returnData.push(row);
+            });
+            deffered.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : get deposit.');
+            deffered.reject(err);
+        }
+    });
+    return deffered.promise;
+};
+
+// fetch RWNC stock based upon passed filters
+exports.fetchRwncStock = function(stockFilterDB) {
+    var deffered = q.defer();
+    var result;
+    var queryString = 'select * from stock, item where item.item_id = stock.item_id ';
+    if (stockFilterDB != null && stockFilterDB.size>0){
+	query = query + " and " + stockFilterDB.join(" and ");
+    }
+    console.log(queryString);	
+    connection.query(queryString, function(err, rows, fields) {
+        if (!err) {
+            var returnData = [];
+            rows.forEach(function(row) {
+                returnData.push(row);
+            });
+            deffered.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : get stock.');
+            deffered.reject(err);
         }
     });
     return deffered.promise;
