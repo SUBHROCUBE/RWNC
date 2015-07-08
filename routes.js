@@ -1,6 +1,6 @@
 var path = require('path'),
     pass = require('./passport-util')
-    passport = require('passport'),
+passport = require('passport'),
     session = require('./session');
 var modelutil = require('./model-util');
 var dbUtil = require('./db-util');
@@ -177,15 +177,25 @@ module.exports = function(app) {
     // POST a new Received details
     // use content-type 		 Application/json
     app.post('/received', function(req, res) {
-        var received_details = req.body;
+        var receivedDetails = req.body;
         var user_id = 1; // change it with user ID obtained from session
-        dbUtil.insertReceived(user_id, received_details).then(function(data) {
-            if (data != null) {
+
+        var returnData = {};
+        dbUtil.checkDuplicateAddAndFetchItem(user_id, receivedDetails).then(function(itemId) {
+            console.log(itemId);
+            receivedDetails['itemId'] = itemId;
+            dbUtil.insertReceived(user_id, receivedDetails).then(function(receivedId) {
+                dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
+                    console.log(depositId);
+                    returnData['depositId'] = depositId;
+                });
+                dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
+                    console.log(stockId);
+                    returnData['stockId'] = stockId;
+                });
                 res.statusCode = 200;
-                res.send(data);
-            }
-        }, function(err) {
-            res.send(err)
+                res.send(receivedId);
+            });
         });
     });
 
@@ -200,26 +210,25 @@ module.exports = function(app) {
         var stockFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
 
-	modelutil.stockFilterModelToDB(stockFilterModel).then(function (stockFilterDB){
-		if (stockFilterModel.hasOwnProperty('customerId')){
-console.log(stockFilterDB);
-			dbUtil.fetchCustomerDeposit(stockFilterDB).then(function(data){
-				var depositModel=modelutil.getDeposit(data);
-				res.statusCode = 200;
-				res.send(depositModel);
-			}, function(err) {
-		    		res.send(err);
-			});
-		} else {
-			dbUtil.fetchRwncStock(stockFilterModel).then(function(data){
-				var stockModel=modelutil.getStock(data);
-				res.statusCode = 200;
-				res.send(stockModel);
-			}, function(err) {
-		    		res.send(err);
-			});
-		}
-	});
+        modelutil.stockFilterModelToDB(stockFilterModel).then(function(stockFilterDB) {
+            if (stockFilterModel.hasOwnProperty('customerId')) {
+                dbUtil.fetchCustomerDeposit(stockFilterDB).then(function(data) {
+                    var depositModel = modelutil.getDeposit(data);
+                    res.statusCode = 200;
+                    res.send(depositModel);
+                }, function(err) {
+                    res.send(err);
+                });
+            } else {
+                dbUtil.fetchRwncStock(stockFilterModel).then(function(data) {
+                    var stockModel = modelutil.getStock(data);
+                    res.statusCode = 200;
+                    res.send(stockModel);
+                }, function(err) {
+                    res.send(err);
+                });
+            }
+        });
     });
 
     app.get('/logout', function(req, res) {
