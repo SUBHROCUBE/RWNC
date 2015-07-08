@@ -8,7 +8,7 @@ var connection = mysql.createConnection({
 });
 // get all user names
 exports.getUsers = function() {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var users = [];
     connection.query('SELECT user_name from user', function(err, rows, fields) {
         if (!err) {
@@ -16,32 +16,32 @@ exports.getUsers = function() {
             rows.forEach(function(row) {
                 users.push(row.user_name);
             });
-            deffered.resolve(users);
+            deferred.resolve(users);
         } else {
             console.log('Error while performing Query : get all users.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // insert a new user
 exports.putUser = function(data) {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('insert into user (user_name,user_pwd) values("' + data.name + '","' + data.password + '")', function(err, rows, fields) {
         if (!err) {
-            deffered.resolve('posted');
+            deferred.resolve('posted');
         } else {
             console.log('Error while performing Query : put user.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // validate existence of an user in system with username and password
 exports.validateUser = function(data) {
     console.log("\n\nhellloo");
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('select user_id from user where user_name = "' + data.username + '" and user_pwd = "' + data.userpwd + '"', function(err, rows, fields) {
         if (!err) {
@@ -49,17 +49,17 @@ exports.validateUser = function(data) {
             rows.forEach(function(row) {
                 user_id = row.user_id;
             });
-            deffered.resolve(user_id);
+            deferred.resolve(user_id);
         } else {
             console.log('Error while performing Query : validate user.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // fetch authorization of a given user
 exports.getAuthorization = function(user_id) {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('select access_name from access, permission where permission.user_id = "' + user_id + '" and permission.access_id = access.access_id', function(err, rows, fields) {
         if (!err) {
@@ -67,17 +67,17 @@ exports.getAuthorization = function(user_id) {
             rows.forEach(function(row) {
                 returnData.push(row.access_name);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : authorize user.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // fetch top 10 recent orders 
 exports.getRecentOrders = function() {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('select * from orders, item, customer where orders.item_id = item.item_id and orders.customer_id = customer.customer_id order by order_date desc limit 5', function(err, rows, fields) {
         if (!err) {
@@ -85,17 +85,17 @@ exports.getRecentOrders = function() {
             rows.forEach(function(row) {
                 returnData.push(row);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent orders.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // fetch top 10 recent receivables
 exports.getRecentReceived = function() {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('select * from received, item, customer where received.item_id = item.item_id and received.customer_id = customer.customer_id and lower(raw_ready)= "raw" order by received_date desc limit 5', function(err, rows, fields) {
         if (!err) {
@@ -103,17 +103,17 @@ exports.getRecentReceived = function() {
             rows.forEach(function(row) {
                 returnData.push(row);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent received.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // fetch top 10 recent deliveries
 exports.getRecentDeliveries = function() {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('select * from delivery, orders, item, customer where delivery.order_id = orders.order_id and orders.item_id = item.item_id and orders.customer_id = customer.customer_id order by order_date desc limit 5', function(err, rows, fields) {
         if (!err) {
@@ -121,17 +121,17 @@ exports.getRecentDeliveries = function() {
             rows.forEach(function(row) {
                 returnData.push(row);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent deliveries.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // fetch top 10 recent low stocks
 exports.getRecentLowStocks = function() {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('select * from stock, item where stock.item_id = item.item_id and (quantity<threshold or weight<threshold) and lower(raw_ready)= "raw" order by stock.uo desc', function(err, rows, fields) {
         if (!err) {
@@ -139,17 +139,17 @@ exports.getRecentLowStocks = function() {
             rows.forEach(function(row) {
                 returnData.push(row);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get recent low stocks.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // fetch all customers
 exports.getAllCustomers = function() {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     connection.query('select * from customer', function(err, rows, fields) {
         if (!err) {
@@ -157,17 +157,17 @@ exports.getAllCustomers = function() {
             rows.forEach(function(row) {
                 returnData.push(row);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get all customers.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // insert a new customer
 exports.insertCustomer = function(user_id, data) {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var returnData = {};
     var query = 'insert into customer (alias, name, spoc, contact1, contact2, address, email1, email2, vat_no, cst_no, status, cb) values (?,?,?,?,?,?,?,?,?,?,?,?)';
     console.log(data);
@@ -178,17 +178,17 @@ exports.insertCustomer = function(user_id, data) {
         if (!err) {
             console.log(result.insertId);
             returnData["id"] = result.insertId;
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : add customer.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 // update a customer
 exports.updateCustomer = function(user_id, data) {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var returnData = {};
     var query = 'update customer set alias = ?, name=?, spoc=?, contact1=?, contact2=?, address=?, email1=?, email2=?, vat_no=?, cst_no=?, ub = ?, uo=now() where customer_id=?';
     var updates = [data["alias"], data["name"], data["spocName"], data["contact1"], data["contact2"], data["address"], data["email1"], data["email2"], data["vatNo"], data["cstNo"], user_id, data["id"]];
@@ -198,54 +198,58 @@ exports.updateCustomer = function(user_id, data) {
         if (!err) {
             console.log(result.insertId);
             returnData["Changed Rows"] = result.changedRows;
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : update customer.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 checkDuplicateItem = function(itemToCheck) {
-        var raw_ready = itemToCheck["itemRawReady"];
-        var material = itemToCheck["itemMaterial"];
-        var type = itemToCheck["itemType"];
-        var diameter = itemToCheck["itemDiameter"];
-        if (diameter == null) {
-            diameter = 0;
-        }
-        if (raw_ready == "raw") {
-            var query = 'select * from item where raw_ready=? and  material=? and type=? and diameter=?';
-            var inserts = [raw_ready, material, type, diameter];
-            query = mysql.format(query, inserts);
-	    console.log(query);
-            connection.query(query, function(err, rows, fields) {
-                if (!err) {
-                    var returnData = [];
-                    rows.forEach(function(row) {
-                        returnData.push(row);
-                    });
-                    if (returnData.size == 1) {
-			console.log('Item found : itemToCheck : single row returned');
-                        return returnData[0].item_id;
-                    } else if (returnData.size > 1) {
-                        console.log('Error while performing Query : itemToCheck : multiple rows returned');
-                        return returnData[0].item_id;
-                    } else {
-                        console.log('Item not found : itemToCheck');
-                        return -1;
-                    }
-                } else {
-                    console.log('Error while performing Query : itemToCheck.');
-                    return -1;
-                }
-            })
-        }
+    var deferred = q.defer();
+    var raw_ready = itemToCheck["itemRawReady"];
+    var material = itemToCheck["itemMaterial"];
+    var type = itemToCheck["itemType"];
+    var diameter = itemToCheck["itemDiameter"];
+    if (diameter == null) {
+        diameter = 0;
     }
+    if (raw_ready == "raw") {
+        var query = 'select * from item where raw_ready=? and  material=? and type=? and diameter=?';
+        var inserts = [raw_ready, material, type, diameter];
+        query = mysql.format(query, inserts);
+        console.log(query);
+        connection.query(query, function(err, rows, fields) {
+            if (!err) {
+                var returnData = [];
+                rows.forEach(function(row) {
+                    returnData.push(row);
+                });
+                if (returnData.size == 1) {
+                    console.log('Item found : itemToCheck : single row returned');
+                    deferred.resolve(returnData[0].item_id);
+                } else if (returnData.size > 1) {
+                    console.log('Error while performing Query : itemToCheck : multiple rows returned');
+                    deferred.resolve(returnData[0].item_id);
+                } else {
+                    console.log('Item not found : itemToCheck');
+                    deferred.resolve(-1);
+                }
+            } else {
+                console.log('Error while performing Query : itemToCheck.');
+                deferred.resolve(-1);
+            }
+        })
+    }
+    return deferred.promise;
+}
 
 // insert a new item
 insertItem = function(user_id, data) {
+    var deferred = q.defer();
     var returnData = {};
+
     var query = 'insert into item (opening, diameter, length, width, type, material, raw_ready, description, is_clamp, c_pos, c_length, c_thickness, c_desc, threshold, cb) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
     var inserts = [data["itemOpening"], data["itemDiameter"], data["itemLength"], data["itemWidth"], data["itemType"], data["itemMaterial"], data["itemRawReady"], data["itemDescription"], data["itemClamped"], data["itemClampPosition"], data["itemClampLength"], data["itemClampThickness"], data["itemClampDescription"], data["itemThreshold"], user_id];
     query = mysql.format(query, inserts);
@@ -253,87 +257,181 @@ insertItem = function(user_id, data) {
     connection.query(query, function(err, result) {
         if (!err) {
             console.log(result.insertId);
-            returnData["itemID"] = result.insertId;
+            deferred.resolve(result.insertId);
         } else {
             console.log('Error while performing Query : add item.');
-            deffered.reject(err)
+            deferred.reject(err);
         }
     });
-    return returnData;
+    return deferred.promise;
 };
+
+exports.checkDuplicateAddAndFetchItem = function(user_id, data) {
+    var deferred = q.defer();
+    checkDuplicateItem(data).then(function(itemId) {
+        if (itemId == -1) {
+            insertItem(user_id, data).then(function(itemId2) {
+                deferred.resolve(itemId2);
+            });
+        } else {
+            deferred.resolve(itemId);
+        }
+    });
+    return deferred.promise;
+};
+
+exports.checkAndInsertDeposit = function(user_id, data) {
+    var returnData = [];
+    var deferred = q.defer();
+    var queryString1 = 'select * from deposit where customer_id = ? and item_id = ?';
+    var inserts = [data["customerId"], data["itemId"]];
+    queryString1 = mysql.format(queryString1, inserts);
+    console.log(queryString1);
+    connection.query(queryString1, function(err, rows, fields) {
+        if (!err) {
+            var returnData2 = [];
+            rows.forEach(function(row) {
+                returnData2.push(row);
+            });
+            if (returnData2.length == 0) {
+                var queryString2 = 'insert into deposit (customer_id, item_id, quantity, weight, cb) values (?,?,?,?,?)';
+                inserts = [data["customerId"], data["itemId"], data["quantity"], data["weight"], user_id];
+                queryString2 = mysql.format(queryString2, inserts);
+                console.log(queryString2);
+                connection.query(queryString2, function(err, result) {
+                    if (!err) {
+                        console.log(result.insertId);
+                        deferred.resolve(result.insertId);
+                    }
+                });
+
+            } else {
+                var queryString2 = 'update deposit set  quantity=quantity + ?, weight=weight+ ? , ub=?  where customer_id=? and item_id =?';
+                inserts = [data["quantity"], data["weight"], user_id, data["customerId"], data["itemId"]];
+                queryString2 = mysql.format(queryString2, inserts);
+                console.log(queryString2);
+                connection.query(queryString2, function(err, rows, fields) {
+                    if (!err) {
+                        console.log(result.changedRows);
+                        deferred.resolve(result.changedRows);
+                    }
+                });
+            }
+        }
+    });
+    return deferred.promise;
+};
+
+exports.checkAndInsertStock = function(user_id, data) {
+    var returnData = [];
+    var deferred = q.defer();
+    var queryString1 = 'select * from stock where  item_id = ?';
+    var inserts = [data["itemId"]];
+    queryString1 = mysql.format(queryString1, inserts);
+    console.log(queryString1);
+    connection.query(queryString1, function(err, rows, fields) {
+        if (!err) {
+            var returnData2 = [];
+            rows.forEach(function(row) {
+                returnData2.push(row);
+            });
+            if (returnData2.length == 0) {
+                var queryString2 = 'insert into stock (item_id, quantity, weight, cb) values (?,?,?,?)';
+                inserts = [data["itemId"], data["quantity"], data["weight"], user_id];
+                queryString2 = mysql.format(queryString2, inserts);
+                console.log(queryString2);
+                connection.query(queryString2, function(err, result) {
+                    if (!err) {
+                        console.log(result.insertId);
+                        deferred.resolve(result.insertId);
+                    }
+                });
+
+            } else {
+                var queryString2 = 'update stock set quantity=quantity + ?, weight=weight+ ? , ub=?  where item_id =?';
+                inserts = [data["quantity"], data["weight"], user_id, data["itemId"]];
+                queryString2 = mysql.format(queryString2, inserts);
+                console.log(queryString2);
+                connection.query(queryString2, function(err, rows, fields) {
+                    if (!err) {
+                        console.log(result.changedRows);
+                        deferred.resolve(result.changedRows);
+                    }
+                });
+            }
+        }
+    });
+    return deferred.promise;
+};
+
+
 
 // insert a new received
 exports.insertReceived = function(user_id, data) {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var returnData = {};
-    var item_id = checkDuplicateItem(data);
-console.log("item id is "+item_id);
-    if (-1 == item_id) {
-console.log("go to insertitem");
-        var item = insertItem(user_id, data);
-        item_id = item["itemId"];
-    }
+
     var query = 'insert into received (customer_id, item_id, quantity, weight, received_date, cb) values (?,?,?,?, now(),?)';
-    var inserts = [data["customerId"], item_id, data["receivedQuantity"], data["receivedWeight"], user_id];
+    var inserts = [data["customerId"], data["itemId"], data["itemQuantity"], data["itemWeight"], user_id];
     query = mysql.format(query, inserts);
     console.log(query);
     connection.query(query, function(err, result) {
         if (!err) {
             console.log(result.insertId);
             returnData["receivedId"] = result.insertId;
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : add received.');
-            deffered.reject(err)
+            deferred.reject(err)
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 
 // fetch customer deposit based upon passed filters
 exports.fetchCustomerDeposit = function(stockFilterDB) {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
-    var queryString = 'select * from deposit, item, customer where deposit.item_id = item.item_id and deposit.customer_id = customer.customer_id';	
-    if (stockFilterDB != null && stockFilterDB.length > 0){
-	queryString = queryString + " and " + stockFilterDB.join(" and ");
+    var queryString = 'select * from deposit, item, customer where deposit.item_id = item.item_id and deposit.customer_id = customer.customer_id';
+    if (stockFilterDB != null && stockFilterDB.length > 0) {
+        queryString = queryString + " and " + stockFilterDB.join(" and ");
     }
-    console.log(queryString);	
+    console.log(queryString);
     connection.query(queryString, function(err, rows, fields) {
         if (!err) {
             var returnData = [];
             rows.forEach(function(row) {
                 returnData.push(row);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get deposit.');
-            deffered.reject(err);
+            deferred.reject(err);
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
 
 // fetch RWNC stock based upon passed filters
 exports.fetchRwncStock = function(stockFilterDB) {
-    var deffered = q.defer();
+    var deferred = q.defer();
     var result;
     var queryString = 'select * from stock, item where item.item_id = stock.item_id ';
-    if (stockFilterDB != null && stockFilterDB.size>0){
-	query = query + " and " + stockFilterDB.join(" and ");
+    if (stockFilterDB != null && stockFilterDB.size > 0) {
+        query = query + " and " + stockFilterDB.join(" and ");
     }
-    console.log(queryString);	
+    console.log(queryString);
     connection.query(queryString, function(err, rows, fields) {
         if (!err) {
             var returnData = [];
             rows.forEach(function(row) {
                 returnData.push(row);
             });
-            deffered.resolve(returnData);
+            deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get stock.');
-            deffered.reject(err);
+            deferred.reject(err);
         }
     });
-    return deffered.promise;
+    return deferred.promise;
 };
