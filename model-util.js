@@ -154,6 +154,56 @@ exports.stockFilterModelToDB = function (stockFilterModel) {
 	return deffered.promise;
 };
 
+
+exports.orderFilterModelToDB = function (orderFilterModel) {
+	var deffered = q.defer();
+	var returnArray=[];
+	if (orderFilterModel.hasOwnProperty('customerId')) {
+		returnArray.push("orders.customer_id = "+ orderFilterModel['customerId']);
+	}
+	if (orderFilterModel.hasOwnProperty('itemOpening')) {
+		returnArray.push("item.opening = "+ orderFilterModel['itemOpening']);
+	}
+	if (orderFilterModel.hasOwnProperty('itemDiameter')) {
+		returnArray.push("item.diameter = "+ orderFilterModel['itemDiameter']);
+	}
+	if (orderFilterModel.hasOwnProperty('itemLength')) {
+		returnArray.push("item.length = "+ orderFilterModel['itemLength']);
+	}
+	if (orderFilterModel.hasOwnProperty('itemWidth')) {
+		returnArray.push("item.width = "+ orderFilterModel['itemWidth']);
+	}
+	if (orderFilterModel.hasOwnProperty('itemMaterial')) {
+		returnArray.push("item.material = '"+ orderFilterModel['itemMaterial']+"'");
+	}
+	if (orderFilterModel.hasOwnProperty('itemType')) {
+		returnArray.push("item.type = '"+ orderFilterModel['itemType']+"'");
+	}
+	if (orderFilterModel.hasOwnProperty('isRawReady')) {
+		returnArray.push("item.raw_ready = '"+ orderFilterModel['isRawReady']+"'");
+	}
+	if (orderFilterModel.hasOwnProperty('isClamped')) {
+		returnArray.push("item.is_clamp = "+ orderFilterModel['isClamped']);
+	}
+	if (orderFilterModel.hasOwnProperty('clampThickness')) {
+		returnArray.push("item.c_thickness = "+ orderFilterModel['clampThickness']);
+	}
+	if (orderFilterModel.hasOwnProperty('orderStatus')) {
+		returnArray.push("orders.status = '"+ orderFilterModel['orderStatus']+"'");
+	}
+	if (orderFilterModel.hasOwnProperty('orderDateFrom') && orderFilterModel.hasOwnProperty('orderDateTo')) {
+		returnArray.push("orders.order_date between '"+ orderFilterModel['orderDateFrom'] + "' and '"+ orderFilterModel['orderDateTo']+"'");
+	}
+	if (orderFilterModel.hasOwnProperty('deliveryDateFrom') && orderFilterModel.hasOwnProperty('deliveryDateTo')) {
+		returnArray.push("orders.delivery_date between '"+ orderFilterModel['deliveryDateFrom'] + "' and '"+ orderFilterModel['deliveryDateTo']+"'");
+	}
+
+	deffered.resolve(returnArray);
+	return deffered.promise;
+};
+
+
+
 exports.getDeposit = function (depositDetails) {
     var returnData = [];
     depositDetails.forEach(function(obj) {
@@ -213,4 +263,42 @@ exports.getStock = function (stockDetails) {
         returnData.push(datum);
     });
     return returnData;
-};	
+};
+
+
+
+exports.getOrders = function (orderDetails) {
+    var returnData = [];
+    orderDetails.forEach(function(obj) {
+        var datum = {};
+        datum["orderId"] = obj.order_id;
+        datum["itemId"] = obj.item_id;
+	if (obj.weight != null && obj.weight!=0)
+        	datum["orderAmount"] = obj.weight + " kg";
+	else
+		datum["orderAmount"] = obj.quantity;
+
+        datum["orderRate"] = obj.rate;
+        datum["orderDate"] = obj.order_date;
+        datum["deliveryDate"] = obj.delivery_date;
+        datum["stockProvided"] = obj.stock_provided;
+        datum["status"] = obj.status;
+	
+        datum["opening"] = obj.opening;
+        datum["diameter"] = obj.diameter;
+        datum["length"] = obj.length;
+        datum["width"] = obj.width;
+        datum["type"] = obj.type;
+        datum["material"] = obj.material;
+        datum["isRawReady"] = obj.raw_ready;
+        datum["description"] = obj.description;
+        datum["isClamp"] = obj.is_clamp;
+        datum["clampPosition"] = obj.c_pos;
+        datum["clampLength"] = obj.c_length;
+        datum["clampThickness"] = obj.c_thickness;
+        datum["clampDescription"] = obj.c_desc;
+        datum["threshold"] = obj.threshold;
+        returnData.push(datum);
+    });
+    return returnData;
+};
