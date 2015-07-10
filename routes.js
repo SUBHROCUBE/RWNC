@@ -1,7 +1,8 @@
 var path = require('path'),
     pass = require('./passport-util')
-passport = require('passport'),
-    session = require('./session');
+    passport = require('passport'),
+    session = require('./session'),
+    async = require('async');
 var modelutil = require('./model-util');
 var dbUtil = require('./db-util');
 var ExpressBrute = require('express-brute');
@@ -185,16 +186,22 @@ module.exports = function(app) {
             console.log(itemId);
             receivedDetails['itemId'] = itemId;
             dbUtil.insertReceived(user_id, receivedDetails).then(function(receivedId) {
-                dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
-                    console.log(depositId);
-                    returnData['depositId'] = depositId;
+                async.parallel([
+                    dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
+                        console.log(depositId);
+                        returnData['depositId'] = depositId;
+                    }),
+                    dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
+                        console.log(stockId);
+                        returnData['stockId'] = stockId;
+                    })
+                ], function(err, parallelResults) {
+		    returnData['itemId']=itemId;
+		    returnData['receivedId']=receivedId;
+                    res.statusCode = 200;
+                    res.send(returnData);
                 });
-                dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
-                    console.log(stockId);
-                    returnData['stockId'] = stockId;
-                });
-                res.statusCode = 200;
-                res.send(receivedId);
+
             });
         });
     });
@@ -220,7 +227,7 @@ module.exports = function(app) {
                     res.send(err);
                 });
             } else {
-                dbUtil.fetchRwncStock(stockFilterModel).then(function(data) {
+                dbUtil.fetchRwncStock(stockFilterDB).then(function(data) {
                     var stockModel = modelutil.getStock(data);
                     res.statusCode = 200;
                     res.send(stockModel);
@@ -230,6 +237,25 @@ module.exports = function(app) {
             }
         });
     });
+
+
+    // POST filters to receive orders details
+    // use content-type 		 Application/json
+    app.post('/orders', function(req, res) {
+        var orderFilterModel = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+
+        modelutil.orderFilterModelToDB(orderFilterModel).then(function(orderFilterDB) {
+                dbUtil.fetchOrders(orderFilterDB).then(function(data) {
+                    var orderModel = modelutil.getOrders(data);
+                    res.statusCode = 200;
+                    res.send(orderModel);
+                }, function(err) {
+                    res.send(err);
+                });
+        });
+    });
+
 
     app.get('/logout', function(req, res) {
         req.logOut();
