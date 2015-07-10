@@ -222,16 +222,12 @@ checkDuplicateItem = function(itemToCheck) {
         console.log(query);
         connection.query(query, function(err, rows, fields) {
             if (!err) {
-                var returnData = [];
-                rows.forEach(function(row) {
-                    returnData.push(row);
-                });
-                if (returnData.size == 1) {
+                if (rows.length == 1) {
                     console.log('Item found : itemToCheck : single row returned');
-                    deferred.resolve(returnData[0].item_id);
-                } else if (returnData.size > 1) {
+                    deferred.resolve(rows[0].item_id);
+                } else if (rows.length > 1) {
                     console.log('Error while performing Query : itemToCheck : multiple rows returned');
-                    deferred.resolve(returnData[0].item_id);
+                    deferred.resolve(rows[0].item_id);
                 } else {
                     console.log('Item not found : itemToCheck');
                     deferred.resolve(-1);
@@ -295,7 +291,7 @@ exports.checkAndInsertDeposit = function(user_id, data) {
             });
             if (returnData2.length == 0) {
                 var queryString2 = 'insert into deposit (customer_id, item_id, quantity, weight, cb) values (?,?,?,?,?)';
-                inserts = [data["customerId"], data["itemId"], data["quantity"], data["weight"], user_id];
+                inserts = [data["customerId"], data["itemId"], data["itemQuantity"], data["itemWeight"], user_id];
                 queryString2 = mysql.format(queryString2, inserts);
                 console.log(queryString2);
                 connection.query(queryString2, function(err, result) {
@@ -307,7 +303,7 @@ exports.checkAndInsertDeposit = function(user_id, data) {
 
             } else {
                 var queryString2 = 'update deposit set  quantity=quantity + ?, weight=weight+ ? , ub=?  where customer_id=? and item_id =?';
-                inserts = [data["quantity"], data["weight"], user_id, data["customerId"], data["itemId"]];
+                inserts = [data["itemQuantity"], data["itemWeight"], user_id, data["customerId"], data["itemId"]];
                 queryString2 = mysql.format(queryString2, inserts);
                 console.log(queryString2);
                 connection.query(queryString2, function(err, rows, fields) {
@@ -337,7 +333,7 @@ exports.checkAndInsertStock = function(user_id, data) {
             });
             if (returnData2.length == 0) {
                 var queryString2 = 'insert into stock (item_id, quantity, weight, cb) values (?,?,?,?)';
-                inserts = [data["itemId"], data["quantity"], data["weight"], user_id];
+                inserts = [data["itemId"], data["itemQuantity"], data["itemWeight"], user_id];
                 queryString2 = mysql.format(queryString2, inserts);
                 console.log(queryString2);
                 connection.query(queryString2, function(err, result) {
@@ -349,7 +345,7 @@ exports.checkAndInsertStock = function(user_id, data) {
 
             } else {
                 var queryString2 = 'update stock set quantity=quantity + ?, weight=weight+ ? , ub=?  where item_id =?';
-                inserts = [data["quantity"], data["weight"], user_id, data["itemId"]];
+                inserts = [data["itemQuantity"], data["itemWeight"], user_id, data["itemId"]];
                 queryString2 = mysql.format(queryString2, inserts);
                 console.log(queryString2);
                 connection.query(queryString2, function(err, rows, fields) {
@@ -430,6 +426,32 @@ exports.fetchRwncStock = function(stockFilterDB) {
             deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : get stock.');
+            deferred.reject(err);
+        }
+    });
+    return deferred.promise;
+};
+
+
+// fetch orders based upon passed filters
+exports.fetchOrders = function(orderFilterDB) {
+    var deferred = q.defer();
+    var result;
+    var queryString = 'select * from orders, item where item.item_id = orders.item_id ';
+console.log(orderFilterDB);
+    if (orderFilterDB != null && orderFilterDB.length > 0) {
+        queryString = queryString + " and " + orderFilterDB.join(" and ");
+    }
+    console.log(queryString);
+    connection.query(queryString, function(err, rows, fields) {
+        if (!err) {
+            var returnData = [];
+            rows.forEach(function(row) {
+                returnData.push(row);
+            });
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : get order.');
             deferred.reject(err);
         }
     });
