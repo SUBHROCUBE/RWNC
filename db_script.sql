@@ -199,6 +199,7 @@ insert into deposit (customer_id,item_id,weight,cb) values(1,5,800.00,1);
 DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
 	order_id	int(20) auto_increment,
+	parent_order_id int(20) NOT NULL,
 	customer_id	int(20),
 	item_id	int(20),
 	quantity	int(20),
@@ -219,10 +220,10 @@ CREATE TABLE orders (
 	FOREIGN KEY (item_id) REFERENCES item (item_id)
 );
 
-insert into orders (customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(1,1,4,1780.00,TRUE,'2015-06-12 00:00:00','2015-07-12 00:00:00','DELIVERED',1);
-insert into orders (customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(2,1,8,2780.00,TRUE,'2015-06-12 00:00:00','2015-07-12 00:00:00','IN PRODUCTION',1);
-insert into orders (customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(2,3,10,1680.00,FALSE,'2015-06-12 00:00:00','2015-07-12 00:00:00','IN PRODUCTION',1);
-insert into orders (customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(4,3,4,1750.00,FALSE,'2015-06-12 00:00:00','2015-07-12 00:00:00','ON HOLD',1);
+insert into orders (parent_order_id,customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(1,1,1,4,1780.00,TRUE,'2015-06-12 00:00:00','2015-07-12 00:00:00','DELIVERED',1);
+insert into orders (parent_order_id,customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(2,2,1,8,2780.00,TRUE,'2015-06-12 00:00:00','2015-07-12 00:00:00','IN PRODUCTION',1);
+insert into orders (parent_order_id,customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(3,2,3,10,1680.00,FALSE,'2015-06-12 00:00:00','2015-07-12 00:00:00','IN PRODUCTION',1);
+insert into orders (parent_order_id,customer_id,item_id,quantity,rate,stock_provided,order_date,delivery_date,status,cb) values(4,4,3,4,1750.00,FALSE,'2015-06-12 00:00:00','2015-07-12 00:00:00','ON HOLD',1);
 
 DROP TABLE IF EXISTS delivery;
 CREATE TABLE delivery (
