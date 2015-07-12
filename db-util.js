@@ -238,6 +238,31 @@ checkDuplicateItem = function(itemToCheck) {
             }
         })
     }
+
+
+    else if (raw_ready == "ready") {
+        var query = 'select * from item where raw_ready=? and  material=? and type=? and diameter=? and opening=? and is_clamp=? and c_pos=? and c_length=? and c_thickness=? and c_desc=?';
+        var inserts = [raw_ready, material, type, diameter, itemToCheck["itemOpening"], itemToCheck["itemClamped"], itemToCheck["itemClampPosition"],itemToCheck["itemClampLength"],itemToCheck["itemClampThickness"],itemToCheck["itemClampDescription"]];
+        query = mysql.format(query, inserts);
+        console.log(query);
+        connection.query(query, function(err, rows, fields) {
+            if (!err) {
+                if (rows.length == 1) { 
+                    console.log('Item found : itemToCheck : single row returned');
+                    deferred.resolve(rows[0].item_id);
+                } else if (rows.length > 1) {
+                    console.log('Error while performing Query : itemToCheck : multiple rows returned');
+                    deferred.resolve(rows[0].item_id);
+                } else {
+                    console.log('Item not found : itemToCheck');
+                    deferred.resolve(-1);
+                }
+            } else {
+                console.log('Error while performing Query : itemToCheck.');
+                deferred.resolve(-1);
+            }
+        })
+    }
     return deferred.promise;
 }
 
@@ -438,7 +463,7 @@ exports.fetchOrders = function(orderFilterDB) {
     var deferred = q.defer();
     var result;
     var queryString = 'select * from orders, item where item.item_id = orders.item_id ';
-console.log(orderFilterDB);
+
     if (orderFilterDB != null && orderFilterDB.length > 0) {
         queryString = queryString + " and " + orderFilterDB.join(" and ");
     }
@@ -457,3 +482,55 @@ console.log(orderFilterDB);
     });
     return deferred.promise;
 };
+
+// insert a new Order
+exports.insertOrder = function(user_id, data) {
+    var deferred = q.defer();
+    var returnData = {};
+console.log(data);
+console.log(data.parentOrderId);
+    var query = 'insert into orders (parent_order_id, customer_id, item_id, quantity, weight, rate, order_date, cb) values (?,?,?,?,?,?, now(),?)';
+    var inserts = [data["parentOrderId"],data["customerId"], data["itemId"], data["orderQuantity"], data["orderWeight"], data["orderRate"], user_id];
+    query = mysql.format(query, inserts);
+    console.log(query);
+    connection.query(query, function(err, result) {
+        if (!err) {
+            console.log(result.insertId);
+            returnData["orderId"] = result.insertId;
+	    returnData["parentOrderId"] = data["parentOrderId"];
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : add Order.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
+
+// fetch next parent order ID
+exports.fetchNextParentOrderId = function() {
+    var deferred = q.defer();
+    var result;
+    var queryString = 'select max(parent_order_id) + 1 as id from orders';
+    console.log(queryString);
+    connection.query(queryString, function(err, rows, fields) {
+        if (!err) {
+            var returnData;
+            rows.forEach(function(row) {
+                returnData=row.id;
+            });
+
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : fetch next parent order ID.');
+            deferred.reject(err);
+        }
+    });
+    return deferred.promise;
+};
+
+
+
+
+
