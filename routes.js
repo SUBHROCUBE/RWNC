@@ -1,6 +1,6 @@
 var path = require('path'),
     pass = require('./passport-util')
-    passport = require('passport'),
+passport = require('passport'),
     session = require('./session'),
     async = require('async');
 var modelutil = require('./model-util');
@@ -196,8 +196,8 @@ module.exports = function(app) {
                         returnData['stockId'] = stockId;
                     })
                 ], function(err, parallelResults) {
-		    returnData['itemId']=itemId;
-		    returnData['receivedId']=receivedId;
+                    returnData['itemId'] = itemId;
+                    returnData['receivedId'] = receivedId;
                     res.statusCode = 200;
                     res.send(returnData);
                 });
@@ -246,21 +246,45 @@ module.exports = function(app) {
         var user_id = 1; // change it with user ID obtained from session
 
         modelutil.orderFilterModelToDB(orderFilterModel).then(function(orderFilterDB) {
-                dbUtil.fetchOrders(orderFilterDB).then(function(data) {
-                    var orderModel = modelutil.getOrders(data);
-                    res.statusCode = 200;
-                    res.send(orderModel);
-                }, function(err) {
-                    res.send(err);
-                });
+            dbUtil.fetchOrders(orderFilterDB).then(function(data) {
+                var orderModel = modelutil.getOrders(data);
+                res.statusCode = 200;
+                res.send(orderModel);
+            }, function(err) {
+                res.send(err);
+            });
         });
     });
 
+    // POST a new order
+    // use content-type 		 Application/json
+    app.post('/order', function(req, res) {
+        var orderDetails = req.body;
+        var user_id = 1; // change it with user ID obtained from session
 
-    app.get('/logout', function(req, res) {
-        req.logOut();
-        res.redirect('/rwnc');
+        dbUtil.checkDuplicateAddAndFetchItem(user_id, orderDetails).then(function(itemId) {
+            console.log(itemId);
+            orderDetails['itemId'] = itemId;
+            if ((!orderDetails.hasOwnProperty("parentOrderId")) || orderDetails["parentOrderId"] == null) {
+                dbUtil.fetchNextParentOrderId().then(function(parentOrderId) {
+                    orderDetails["parentOrderId"] = parentOrderId;
+                    dbUtil.insertOrder(user_id, orderDetails).then(function(returnData) {
+                        res.statusCode = 200;
+                        res.send(returnData);
+                    });
+                });
+            } else {
+                dbUtil.insertOrder(user_id, orderDetails).then(function(returnData) {
+                    res.statusCode = 200;
+                    res.send(returnData);
+                });
+            }
+        });
+
+
+        app.get('/logout', function(req, res) {
+            req.logOut();
+            res.redirect('/rwnc');
+        });
     });
-
-
 };
