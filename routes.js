@@ -280,11 +280,30 @@ module.exports = function(app) {
                 });
             }
         });
-
-
-        app.get('/logout', function(req, res) {
-            req.logOut();
-            res.redirect('/rwnc');
+    });
+    // POST filters to retrieve productions details
+    // use content-type 		 Application/json
+    app.post('/productions', function(req, res) {
+        var productionFilterModel = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+        
+        modelutil.productionFilterModelToDB(productionFilterModel).then(function(productionFilterDB) {
+            dbUtil.fetchProductions(productionFilterDB).then(function(data) {
+                var productionModel = modelutil.getProductions(data);
+                res.statusCode = 200;
+                res.send(productionModel);
+            }, function(err) {
+                res.send(err);
+            });
         });
     });
+
+
+
+
+    app.get('/logout', function(req, res) {
+        req.logOut();
+        res.redirect('/rwnc');
+    });
+
 };
