@@ -530,6 +530,32 @@ exports.fetchNextParentOrderId = function() {
     return deferred.promise;
 };
 
+// fetch productions based upon passed filter
+exports.fetchProductions = function(productionFilterDB) {
+    var deferred = q.defer();
+    var result;
+    var queryString = 'select * from production, orders, item, customer where production.order_id = orders.order_id and item.item_id = orders.item_id and orders.customer_id = customer.customer_id ';
+
+    if (productionFilterDB != null && productionFilterDB.length > 0) {
+        queryString = queryString + " and " + productionFilterDB.join(" and ");
+    }
+
+	queryString = queryString + ' order by field(production.status, "NOT STARTED", "STARTED", "COMPLETED") ';
+    console.log(queryString);
+    connection.query(queryString, function(err, rows, fields) {
+        if (!err) {
+            var returnData = [];
+            rows.forEach(function(row) {
+                returnData.push(row);
+            });
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : get productions.');
+            deferred.reject(err);
+        }
+    });
+    return deferred.promise;
+};
 
 
 
