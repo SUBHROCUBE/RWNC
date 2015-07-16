@@ -283,6 +283,70 @@ exports.getOrders = function (orderDetails) {
         datum["deliveryDate"] = obj.delivery_date;
         datum["stockProvided"] = obj.stock_provided;
         datum["status"] = obj.status;
+        datum["orderQuantity"] = obj.quantity;
+        datum["orderQuantityCompleted"] = obj.quantity_completed;
+        datum["orderQuantityInProduction"] = obj.quantity_in_production;
+        datum["orderQuantityRemaining"] = obj.quantity - obj.quantity_completed - obj.quantity_in_production;
+	
+        datum["opening"] = obj.opening;
+        datum["diameter"] = obj.diameter;
+        datum["length"] = obj.length;
+        datum["width"] = obj.width;
+        datum["type"] = obj.type;
+        datum["material"] = obj.material;
+        datum["isRawReady"] = obj.raw_ready;
+        datum["description"] = obj.description;
+        datum["isClamp"] = obj.is_clamp;
+        datum["clampPosition"] = obj.c_pos;
+        datum["clampLength"] = obj.c_length;
+        datum["clampThickness"] = obj.c_thickness;
+        datum["clampDescription"] = obj.c_desc;
+        datum["threshold"] = obj.threshold;
+        returnData.push(datum);
+    });
+    return returnData;
+};
+
+
+
+exports.productionFilterModelToDB = function (productionFilterModel) {
+	var deffered = q.defer();
+	var returnArray=[];
+	if (productionFilterModel.hasOwnProperty('customerId')) {
+		returnArray.push("orders.customer_id = "+ productionFilterModel['customerId']);
+	}
+	if (productionFilterModel.hasOwnProperty('customerAlias')) {
+		returnArray.push("customer.alias = '"+ productionFilterModel['customerAlias']+"'");
+	}
+	if (productionFilterModel.hasOwnProperty('orderId')) {
+		returnArray.push("orders.order_id = "+ productionFilterModel['orderId']);
+	}
+	if (productionFilterModel.hasOwnProperty('productionStatus')) {
+		returnArray.push("production.status = '"+ productionFilterModel['productionStatus']+"'");
+	}
+	
+	deffered.resolve(returnArray);
+	return deffered.promise;
+};
+
+
+exports.getProductions = function (productionDetails) {
+    var returnData = [];
+    productionDetails.forEach(function(obj) {
+        var datum = {};
+        datum["customerId"] = obj.customer_id;
+        datum["customerAlias"] = obj.alias;
+
+        datum["orderId"] = obj.order_id;
+        datum["itemId"] = obj.item_id;
+	if (obj.weight != null && obj.weight!=0)
+        	datum["orderAmount"] = obj.weight + " kg";
+	else
+		datum["orderAmount"] = obj.quantity;
+
+        datum["orderRate"] = obj.rate;
+        datum["startDate"] = obj.start_date;
+        datum["status"] = obj.status;
 	
         datum["opening"] = obj.opening;
         datum["diameter"] = obj.diameter;
