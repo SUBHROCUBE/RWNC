@@ -24,6 +24,45 @@ exports.getUsers = function() {
     });
     return deferred.promise;
 };
+
+// get all type names
+exports.getTypes = function() {
+    var deferred = q.defer();
+    var data = [];
+    connection.query('SELECT type_name from type', function(err, rows, fields) {
+        if (!err) {
+            console.log('Query response is: ', rows);
+            rows.forEach(function(row) {
+                data.push(row.type_name);
+            });
+            deferred.resolve(data);
+        } else {
+            console.log('Error while performing Query : get all types.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
+// get all material names
+exports.getMaterials = function() {
+    var deferred = q.defer();
+    var data = [];
+    connection.query('SELECT material_name from material', function(err, rows, fields) {
+        if (!err) {
+            console.log('Query response is: ', rows);
+            rows.forEach(function(row) {
+                data.push(row.material_name);
+            });
+            deferred.resolve(data);
+        } else {
+            console.log('Error while performing Query : get all materials.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
 // insert a new user
 exports.putUser = function(data) {
     var deferred = q.defer();
@@ -173,7 +212,7 @@ exports.insertCustomer = function(user_id, data) {
     console.log(data);
     var inserts = [data["alias"], data["name"], data["spocName"], data["contact1"], data["contact2"], data["address"], data["email1"], data["email2"], data["vatNo"], data["cstNo"], 'active', user_id];
     query = mysql.format(query, inserts);
-    console.log(query)
+    console.log(query);
     connection.query(query, function(err, result) {
         if (!err) {
             console.log(result.insertId);
@@ -557,6 +596,45 @@ exports.fetchProductions = function(productionFilterDB) {
     return deferred.promise;
 };
 
+// insert a new production
+exports.insertProduction = function(user_id, data) {
+    var deferred = q.defer();
+    var returnData = {};
+    var query = 'insert into production (order_id, expected_end_date, start_date, pm, dice, machine, status, cb) values (?,?,?,?,?,?,?,?)';
+    console.log(data);
+    var inserts = [data["orderId"], data["expectedEndDate"], data["startDate"], data["productionManager"], data["dice"], data["machine"], data["status"], user_id];
+    query = mysql.format(query, inserts);
+    console.log(query);
+    connection.query(query, function(err, result) {
+        if (!err) {
+            console.log(result.insertId);
+            returnData["id"] = result.insertId;
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : add production.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
 
-
-
+// update a production
+exports.updateProduction = function(user_id, data) {
+    var deferred = q.defer();
+    var returnData = {};
+    var query = 'update production set expected_end_date = ?, start_date=?, end_date=?, pm=?, dice=?, machine=?, status=?, uo=now(), ub=? where production_id=?';
+    var updates = [data["expectedEndDate"], data["startDate"], data["endDate"], data["pm"], data["dice"], data["machine"], data["status"], user_id, data["productionId"]];
+    query = mysql.format(query, updates);
+    console.log(query);
+    connection.query(query, function(err, result) {
+        if (!err) {
+            console.log(result.insertId);
+            returnData["Changed Rows"] = result.changedRows;
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : update production.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
