@@ -55,6 +55,23 @@ module.exports = function(app) {
         })
     });
 
+    app.get('/alltypes', function(req, res) {
+        dbUtil.getTypes().then(function(data) {
+            res.send((JSON.stringify(data)).toString());
+        }, function(error) {
+            res.send(error)
+        })
+    });
+
+    app.get('/allmaterials', function(req, res) {
+        dbUtil.getMaterials().then(function(data) {
+            res.send((JSON.stringify(data)).toString());
+        }, function(error) {
+            res.send(error)
+        })
+    });
+
+
 
     // post a new user
     // use data {"name":"***", "password":"***"}
@@ -286,7 +303,7 @@ module.exports = function(app) {
     app.post('/productions', function(req, res) {
         var productionFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
-        
+
         modelutil.productionFilterModelToDB(productionFilterModel).then(function(productionFilterDB) {
             dbUtil.fetchProductions(productionFilterDB).then(function(data) {
                 var productionModel = modelutil.getProductions(data);
@@ -299,7 +316,27 @@ module.exports = function(app) {
     });
 
 
+    // POST a new production detail
+    // use content-type 		 Application/json
+    app.post('/production', function(req, res) {
+        var productionDetails = req.body;
+        var user_id = 1; // change it with user ID obtained from session
 
+        if (productionDetails.hasOwnProperty("productionId")) {
+            // update the production details
+            dbUtil.updateProduction(user_id, productionDetails).then(function(data) {
+                res.statusCode = 200;
+                res.send(data);
+            });
+        } else {
+            // insert new production details
+            dbUtil.insertProduction(user_id, productionDetails).then(function(data) {
+                res.statusCode = 200;
+                res.send(data);
+
+            });
+        }
+    });
 
     app.get('/logout', function(req, res) {
         req.logOut();
