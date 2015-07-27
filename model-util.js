@@ -307,8 +307,6 @@ exports.getOrders = function (orderDetails) {
     return returnData;
 };
 
-
-
 exports.productionFilterModelToDB = function (productionFilterModel) {
 	var deffered = q.defer();
 	var returnArray=[];
@@ -334,6 +332,7 @@ exports.getProductions = function (productionDetails) {
     var returnData = [];
     productionDetails.forEach(function(obj) {
         var datum = {};
+
         datum["customerId"] = obj.customer_id;
         datum["customerAlias"] = obj.alias;
 
@@ -345,7 +344,6 @@ exports.getProductions = function (productionDetails) {
 		datum["orderAmount"] = obj.quantity;
 
         datum["orderRate"] = obj.rate;
-        datum["startDate"] = obj.start_date;
         datum["status"] = obj.status;
 	
         datum["opening"] = obj.opening;
@@ -362,6 +360,17 @@ exports.getProductions = function (productionDetails) {
         datum["clampThickness"] = obj.c_thickness;
         datum["clampDescription"] = obj.c_desc;
         datum["threshold"] = obj.threshold;
+
+        datum["startDate"] = obj.start_date;
+        datum["expectedEndDate"] = obj.expected_end_date;
+        datum["endDate"] = obj.end_date;
+        datum["productionManager"] = obj.pm;
+        datum["dice"] = obj.dice;
+        datum["machine"] = obj.machine;
+        datum["endDate"] = obj.end_date;
+
+
+
         returnData.push(datum);
     });
     return returnData;
