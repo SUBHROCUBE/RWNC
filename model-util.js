@@ -203,6 +203,18 @@ exports.orderFilterModelToDB = function (orderFilterModel) {
 };
 
 
+exports.receiveFilterModelToDB = function (receiveFilterModel) {
+	var deffered = q.defer();
+	var returnArray=[];
+	if (orderFilterModel.hasOwnProperty('customerId')) {
+		returnArray.push("received.customer_id = "+ receiveFilterModel['customerId']);
+	}
+
+	deffered.resolve(returnArray);
+	return deffered.promise;
+};
+
+
 
 exports.getDeposit = function (depositDetails) {
     var returnData = [];
@@ -287,6 +299,37 @@ exports.getOrders = function (orderDetails) {
         datum["orderQuantityCompleted"] = obj.quantity_completed;
         datum["orderQuantityInProduction"] = obj.quantity_in_production;
         datum["orderQuantityRemaining"] = obj.quantity - obj.quantity_completed - obj.quantity_in_production;
+	
+        datum["opening"] = obj.opening;
+        datum["diameter"] = obj.diameter;
+        datum["length"] = obj.length;
+        datum["width"] = obj.width;
+        datum["type"] = obj.type;
+        datum["material"] = obj.material;
+        datum["isRawReady"] = obj.raw_ready;
+        datum["description"] = obj.description;
+        datum["isClamp"] = obj.is_clamp;
+        datum["clampPosition"] = obj.c_pos;
+        datum["clampLength"] = obj.c_length;
+        datum["clampThickness"] = obj.c_thickness;
+        datum["clampDescription"] = obj.c_desc;
+        datum["threshold"] = obj.threshold;
+        returnData.push(datum);
+    });
+    return returnData;
+};
+
+exports.getReceive = function (receiveDetails) {
+    var returnData = [];
+    receiveDetails.forEach(function(obj) {
+        var datum = {};
+        datum["receivedId"] = obj.received_id;
+		datum["customerId"] = obj.customer_id;
+        datum["itemId"] = obj.item_id;
+	if (obj.weight != null && obj.weight!=0)
+        	datum["receivedAmount"] = obj.weight + " kg";
+	else
+		datum["receivedAmount"] = obj.quantity;
 	
         datum["opening"] = obj.opening;
         datum["diameter"] = obj.diameter;
