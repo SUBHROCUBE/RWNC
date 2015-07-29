@@ -206,7 +206,7 @@ exports.orderFilterModelToDB = function (orderFilterModel) {
 exports.receiveFilterModelToDB = function (receiveFilterModel) {
 	var deffered = q.defer();
 	var returnArray=[];
-	if (orderFilterModel.hasOwnProperty('customerId')) {
+	if (receiveFilterModel.hasOwnProperty('customerId')) {
 		returnArray.push("received.customer_id = "+ receiveFilterModel['customerId']);
 	}
 
