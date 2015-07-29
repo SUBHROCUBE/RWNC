@@ -394,7 +394,7 @@ exports.checkAndInsertDeposit = function(user_id, data) {
                 inserts = [data["itemQuantity"], data["itemWeight"], user_id, data["customerId"], data["itemId"]];
                 queryString2 = mysql.format(queryString2, inserts);
                 console.log(queryString2);
-                connection.query(queryString2, function(err, rows, fields) {
+                connection.query(queryString2, function(err, result) {
                     if (!err) {
                         console.log(result.changedRows);
                         deferred.resolve(result.changedRows);
@@ -436,7 +436,7 @@ exports.checkAndInsertStock = function(user_id, data) {
                 inserts = [data["itemQuantity"], data["itemWeight"], user_id, data["itemId"]];
                 queryString2 = mysql.format(queryString2, inserts);
                 console.log(queryString2);
-                connection.query(queryString2, function(err, rows, fields) {
+                connection.query(queryString2, function(err, result) {
                     if (!err) {
                         console.log(result.changedRows);
                         deferred.resolve(result.changedRows);
