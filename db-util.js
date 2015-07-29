@@ -472,6 +472,31 @@ exports.insertReceived = function(user_id, data) {
     return deferred.promise;
 };
 
+// fetch receives based upon passed filters
+exports.fetchReceive = function(receiveFilterDB) {
+    var deferred = q.defer();
+    var result;
+    var queryString = 'select * from received, item where item.item_id = received.item_id ';
+
+    if (receiveFilterDB != null && receiveFilterDB.length > 0) {
+        queryString = queryString + " and " + receiveFilterDB.join(" and ");
+    }
+    console.log(queryString);
+    connection.query(queryString, function(err, rows, fields) {
+        if (!err) {
+            var returnData = [];
+            rows.forEach(function(row) {
+                returnData.push(row);
+            });
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : get order.');
+            deferred.reject(err);
+        }
+    });
+    return deferred.promise;
+};
+
 // fetch customer deposit based upon passed filters
 exports.fetchCustomerDeposit = function(stockFilterDB) {
     var deferred = q.defer();
