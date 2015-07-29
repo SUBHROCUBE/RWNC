@@ -192,6 +192,28 @@ module.exports = function(app) {
         }
     });
 
+
+    // UPDATE stock details
+    // use content-type 		 Application/json
+    app.put('/stock', function(req, res) {
+        var user_id = 1; // change it with user ID obtained from session
+        var details = req.body;
+        var id = details["stockId"];
+        if (id == null) {
+            res.statusCode = 404;
+            res.send((JSON.stringify(msg3)).toString());
+        } else {
+            dbUtil.updateStock(user_id, details).then(function(data) {
+                if (data != null) {
+                    res.statusCode = 200;
+                    res.send(data);
+                }
+            }, function(err) {
+                res.send(err)
+            });
+        }
+    });
+
     // POST a new Received details
     // use content-type 		 Application/json
     app.post('/received', function(req, res) {
@@ -207,12 +229,15 @@ module.exports = function(app) {
                     dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
                         console.log(depositId);
                         returnData['depositId'] = depositId;
+			callback(null, depositId);
                     }),
                     dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
                         console.log(stockId);
                         returnData['stockId'] = stockId;
+			callback(null, stockId);
                     })
-                ], function(err, parallelResults) {
+                ], function(err, results) {
+		    console.log(results);
                     returnData['itemId'] = itemId;
                     returnData['receivedId'] = receivedId;
                     res.statusCode = 200;
