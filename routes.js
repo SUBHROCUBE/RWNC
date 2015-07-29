@@ -214,6 +214,43 @@ module.exports = function(app) {
         }
     });
 
+	// POST a new Received details
+    // use content-type 		 Application/json
+    app.post('/received', function(req, res) {
+        var receivedDetails = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+
+        var returnData = {};
+        dbUtil.checkDuplicateAddAndFetchItem(user_id, receivedDetails).then(function(itemId) {
+            console.log(itemId);
+            receivedDetails['itemId'] = itemId;
+            dbUtil.insertReceived(user_id, receivedDetails).then(function(receivedId) {
+                async.parallel([
+		   function(callback){
+		            dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
+		                console.log(depositId);
+		                returnData['depositId'] = depositId;
+				callback(null, depositId);
+		            });
+		    },
+		    function(callback){
+		            dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
+		                console.log(stockId);
+		                returnData['stockId'] = stockId;
+				callback(null, stockId);
+		            });
+		   }
+                ], function(err, results) {
+                    returnData['itemId'] = itemId;
+                    returnData['receivedId'] = receivedId.receivedId;
+                    res.statusCode = 200;
+                    res.send(returnData);
+                });
+
+            });
+        });
+    });
+	
     // POST a new Received details
     // use content-type 		 Application/json
     app.post('/received', function(req, res) {
@@ -247,6 +284,23 @@ module.exports = function(app) {
                     res.send(returnData);
                 });
 
+            });
+        });
+    });
+	
+	// POST filters to get receive details
+    // use content-type 		 Application/json
+    app.post('/receives', function(req, res) {
+        var receiveFilterModel = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+
+        modelutil.receiveFilterModelToDB(receiveFilterModel).then(function(receiveFilterDB) {
+            dbUtil.fetchReceive(receiveFilterDB).then(function(data) {
+                var receiveModel = modelutil.getReceive(data);
+                res.statusCode = 200;
+                res.send(receiveModel);
+            }, function(err) {
+                res.send(err);
             });
         });
     });
