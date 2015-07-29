@@ -226,20 +226,23 @@ module.exports = function(app) {
             receivedDetails['itemId'] = itemId;
             dbUtil.insertReceived(user_id, receivedDetails).then(function(receivedId) {
                 async.parallel([
-                    dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
-                        console.log(depositId);
-                        returnData['depositId'] = depositId;
-			callback(null, depositId);
-                    }),
-                    dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
-                        console.log(stockId);
-                        returnData['stockId'] = stockId;
-			callback(null, stockId);
-                    })
+		   function(callback){
+		            dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
+		                console.log(depositId);
+		                returnData['depositId'] = depositId;
+				callback(null, depositId);
+		            });
+		    },
+		    function(callback){
+		            dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
+		                console.log(stockId);
+		                returnData['stockId'] = stockId;
+				callback(null, stockId);
+		            });
+		   }
                 ], function(err, results) {
-		    console.log(results);
                     returnData['itemId'] = itemId;
-                    returnData['receivedId'] = receivedId;
+                    returnData['receivedId'] = receivedId.receivedId;
                     res.statusCode = 200;
                     res.send(returnData);
                 });
