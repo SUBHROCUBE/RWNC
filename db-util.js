@@ -245,6 +245,30 @@ exports.updateCustomer = function(user_id, data) {
     });
     return deferred.promise;
 };
+
+// update stock
+exports.updateStock = function(user_id, data) {
+    var deferred = q.defer();
+    var returnData = {};
+    var query = 'update stock set quantity=?, weight = ?, uo=now(), ub = ? where stock_id=?';
+    var updates = [data["quantity"], data["weight"], user_id, data["stockId"]];
+    query = mysql.format(query, updates);
+    console.log(query);
+    connection.query(query, function(err, result) {
+        if (!err) {
+            console.log(result.insertId);
+            returnData["Changed Rows"] = result.changedRows;
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : update stock.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
+
+
 checkDuplicateItem = function(itemToCheck) {
     var deferred = q.defer();
     var raw_ready = itemToCheck["itemRawReady"];
