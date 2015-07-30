@@ -74,6 +74,26 @@ insert into material (material_name,status) values('ss 316','active');
 insert into material (material_name,status) values('as','active');
 insert into material (material_name,status) values('ms','active');
 
+DROP TABLE IF EXISTS status;
+CREATE TABLE status (
+	status_id	int(20) auto_increment,
+	status_name varchar(100) NOT NULL,
+	status_entity varchar(25) NOT NULL,
+	PRIMARY KEY(status_id)
+);
+
+insert into status (status_name,status_entity) values('OPEN','order');
+insert into status (status_name,status_entity) values('PARTIALLY IN PRODUCTION','order');
+insert into status (status_name,status_entity) values('IN PRODUCTION','order');
+insert into status (status_name,status_entity) values('PARTIALLY COMPLETED','order');
+insert into status (status_name,status_entity) values('COMPLETED','order');
+insert into status (status_name,status_entity) values('PARTIALLY DELIVERED','order');
+insert into status (status_name,status_entity) values('DELIVERED','order');
+insert into status (status_name,status_entity) values('ADDED','production');
+insert into status (status_name,status_entity) values('STARTED','production');
+insert into status (status_name,status_entity) values('COMPLETED','production');
+
+
 DROP TABLE IF EXISTS customer;
 CREATE TABLE customer (
 	customer_id	int(20) auto_increment,
