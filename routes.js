@@ -378,7 +378,10 @@ module.exports = function(app) {
                     res.send(returnData);
                 });
             }
-        });
+        },function(err){
+			  res.send(err);
+			
+		});
     });
     // POST filters to retrieve productions details
     // use content-type 		 Application/json

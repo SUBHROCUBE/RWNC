@@ -230,7 +230,7 @@ CREATE TABLE orders (
 	order_date	DATETIME,
 	delivery_date	DATETIME,
 	stock_provided	BOOLEAN DEFAULT FALSE,
-	status varchar(25) NOT NULL,
+	status varchar(25) DEFAULT 'OPEN',
 	co	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	cb	int(20) ,
 	uo	TIMESTAMP ,

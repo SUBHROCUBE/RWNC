@@ -261,7 +261,7 @@ exports.updateStock = function(user_id, data) {
             deferred.resolve(returnData);
         } else {
             console.log('Error while performing Query : update stock.');
-            deferred.reject(err)
+            deferred.reject(err);
         }
     });
     return deferred.promise;
@@ -297,12 +297,10 @@ checkDuplicateItem = function(itemToCheck) {
                 }
             } else {
                 console.log('Error while performing Query : itemToCheck.');
-                deferred.resolve(-1);
+                deferred.reject(err);
             }
         })
     }
-
-
     else if (raw_ready == "ready") {
         var query = 'select * from item where raw_ready=? and  material=? and type=? and diameter=? and opening=? and is_clamp=? and c_pos=? and c_length=? and c_thickness=? and c_desc=?';
         var inserts = [raw_ready, material, type, diameter, itemToCheck["itemOpening"], itemToCheck["itemClamped"], itemToCheck["itemClampPosition"],itemToCheck["itemClampLength"],itemToCheck["itemClampThickness"],itemToCheck["itemClampDescription"]];
@@ -322,7 +320,7 @@ checkDuplicateItem = function(itemToCheck) {
                 }
             } else {
                 console.log('Error while performing Query : itemToCheck.');
-                deferred.resolve(-1);
+                deferred.reject(err);
             }
         })
     }
@@ -352,13 +350,18 @@ insertItem = function(user_id, data) {
 
 exports.checkDuplicateAddAndFetchItem = function(user_id, data) {
     var deferred = q.defer();
-    checkDuplicateItem(data).then(function(itemId) {
-        if (itemId == -1) {
-            insertItem(user_id, data).then(function(itemId2) {
-                deferred.resolve(itemId2);
-            });
-        } else {
-            deferred.resolve(itemId);
+    checkDuplicateItem(data).then(function(err,itemId) {
+		if(!err){
+			if (itemId == -1) {
+				insertItem(user_id, data).then(function(itemId2) {
+					deferred.resolve(itemId2);
+				});
+			} else {
+				deferred.resolve(itemId);
+			}
+		}else {
+            console.log('Error while resolving item id');
+            deferred.reject(err);
         }
     });
     return deferred.promise;
@@ -613,6 +616,25 @@ exports.fetchNextParentOrderId = function() {
         } else {
             console.log('Error while performing Query : fetch next parent order ID.');
             deferred.reject(err);
+        }
+    });
+    return deferred.promise;
+};
+
+// get all production eligible orders
+exports.fetchOpenOrders = function() {
+    var deferred = q.defer();
+    var data = [];
+    connection.query('SELECT * from orders where order.status in ("OPEN","PARTIALLY IN PRODUCTION","PARTIALLY COMPLETED")', function(err, rows, fields) {
+        if (!err) {
+            console.log('Query response is: ', rows);
+            rows.forEach(function(row) {
+                data.push(row.material_name);
+            });
+            deferred.resolve(data);
+        } else {
+            console.log('Error while performing Query : get all open orders.');
+            deferred.reject(err)
         }
     });
     return deferred.promise;
