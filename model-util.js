@@ -158,6 +158,9 @@ exports.stockFilterModelToDB = function (stockFilterModel) {
 exports.orderFilterModelToDB = function (orderFilterModel) {
 	var deffered = q.defer();
 	var returnArray=[];
+	if (orderFilterModel.hasOwnProperty('parentOrderId')) {
+		returnArray.push("orders.parent_order_id = "+ orderFilterModel['parentOrderId']);
+	}
 	if (orderFilterModel.hasOwnProperty('customerId')) {
 		returnArray.push("orders.customer_id = "+ orderFilterModel['customerId']);
 	}
@@ -283,6 +286,7 @@ exports.getOrders = function (orderDetails) {
     var returnData = [];
     orderDetails.forEach(function(obj) {
         var datum = {};
+		datum["parentOrderId"] = obj.parent_order_id;
         datum["orderId"] = obj.order_id;
         datum["itemId"] = obj.item_id;
 	if (obj.weight != null && obj.weight!=0)
