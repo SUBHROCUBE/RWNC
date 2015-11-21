@@ -70,6 +70,16 @@ module.exports = function(app) {
             res.send(error)
         })
     });
+	
+	app.get('/status', function(req, res) {
+        var user_id = 1; // change it with user ID obtained from session
+        dbUtil.getStaus().then(function(data) {
+                res.statusCode = 200;
+                res.send(data);
+            }, function(err) {
+			res.send(err);
+		});
+    });
 
 
 
@@ -379,8 +389,7 @@ module.exports = function(app) {
                 });
             }
         },function(err){
-			  res.send(err);
-			
+			  res.send(err);		
 		});
     });
     // POST filters to retrieve productions details
@@ -421,6 +430,57 @@ module.exports = function(app) {
 
             });
         }
+    });
+	
+	app.post('/addProductionItem', function(req, res) {
+        var productionDetails = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+
+        if (productionDetails.hasOwnProperty("productionId")) {
+            // update the production details
+            dbUtil.fetchProductionItems(user_id, productionDetails).then(function(data) {
+                res.statusCode = 200;
+                res.send(data);
+            });
+        } else {
+                res.statusCode = 200;
+                res.send(data);
+
+            });
+        }
+    });
+	
+	// POST a new production detail
+    // use content-type 		 Application/json
+    app.post('/productionItems', function(req, res) {
+        var productionDetails = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+
+        if (productionDetails.hasOwnProperty("productionId")) {
+            // update the production details
+            dbUtil.fetchProductionItems(user_id, productionDetails).then(function(data) {
+                res.statusCode = 200;
+                res.send(data);
+            });
+        } else {
+                res.statusCode = 200;
+                res.send(data);
+
+            });
+        }
+    });
+	
+	app.post('/openorders', function(req, res) {
+        var orderFilterModel = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+
+		dbUtil.fetchOpenOrders().then(function(data) {
+			var orderModel = modelutil.getOrders(data);
+			res.statusCode = 200;
+			res.send(orderModel);
+		}, function(err) {
+			res.send(err);
+		});
     });
 
     app.get('/logout', function(req, res) {
