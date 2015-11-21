@@ -150,10 +150,12 @@ exports.stockFilterModelToDB = function (stockFilterModel) {
 	if (stockFilterModel.hasOwnProperty('clampThickness')) {
 		returnArray.push("item.c_thickness = "+ stockFilterModel['clampThickness']);
 	}
+	if (stockFilterModel.hasOwnProperty('stockAddedFrom') && stockFilterModel.hasOwnProperty('stockAddedTo')) {
+		returnArray.push("stock.co between '"+ stockFilterModel['stockAddedFrom'] + "' and '"+ stockFilterModel['stockAddedTo']+"'");
+	}
 	deffered.resolve(returnArray);
 	return deffered.promise;
 };
-
 
 exports.orderFilterModelToDB = function (orderFilterModel) {
 	var deffered = q.defer();
@@ -216,8 +218,6 @@ exports.receiveFilterModelToDB = function (receiveFilterModel) {
 	deffered.resolve(returnArray);
 	return deffered.promise;
 };
-
-
 
 exports.getDeposit = function (depositDetails) {
     var returnData = [];
