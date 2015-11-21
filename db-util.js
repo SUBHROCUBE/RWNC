@@ -63,6 +63,25 @@ exports.getMaterials = function() {
     return deferred.promise;
 };
 
+//get all status
+exports.getStatus = function() {
+    var deferred = q.defer();
+    var data = [];
+    connection.query('SELECT * from status', function(err, rows, fields) {
+        if (!err) {
+            console.log('Query response is: ', rows);
+            rows.forEach(function(row) {
+                data.push(row);
+            });
+            deferred.resolve(data);
+        } else {
+            console.log('Error while performing Query : get all status.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
 // insert a new user
 exports.putUser = function(data) {
     var deferred = q.defer();
@@ -79,7 +98,6 @@ exports.putUser = function(data) {
 };
 // validate existence of an user in system with username and password
 exports.validateUser = function(data) {
-    console.log("\n\nhellloo");
     var deferred = q.defer();
     var result;
     connection.query('select user_id from user where user_name = "' + data.username + '" and user_pwd = "' + data.userpwd + '"', function(err, rows, fields) {
@@ -528,7 +546,7 @@ exports.fetchCustomerDeposit = function(stockFilterDB) {
 exports.fetchRwncStock = function(stockFilterDB) {
     var deferred = q.defer();
     var result;
-    var queryString = 'select * from stock, item where item.item_id = stock.item_id ';
+    var queryString = 'select * from stock, item  where item.item_id = stock.item_id ';
     if (stockFilterDB != null && stockFilterDB.size > 0) {
         query = query + " and " + stockFilterDB.join(" and ");
     }
@@ -709,3 +727,48 @@ exports.updateProduction = function(user_id, data) {
     });
     return deferred.promise;
 };
+
+// get all production eligible orders
+exports.fetchProductionItems = function(user_id, data) {
+    var deferred = q.defer();
+	var returnData=[];
+	 var query = 'SELECT * from production_item_used where production_item_used.production_id= ?';
+	var inserts = [data["productionId"]];
+    query = mysql.format(query, inserts);
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+            console.log('Query response is: ', rows);
+            rows.forEach(function(row) {
+                returnData.push(row);
+            });
+            deferred.resolve(data);
+        } else {
+            console.log('Error while performing Query : fetch production items.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
+exports.addProductionItems = function(user_id, data) {
+	var deferred = q.defer();
+    var returnData = {};
+    var query = 'insert into production_item_used (, cb) values (?,?,?,?,?,?,?,?,?,?,?,?)';
+    console.log(data);
+    var inserts = [data["alias"], data["name"], data["spocName"], data["contact1"], data["contact2"], data["address"], data["email1"], data["email2"], data["vatNo"], data["cstNo"], 'active', user_id];
+    query = mysql.format(query, inserts);
+    console.log(query);
+    connection.query(query, function(err, result) {
+        if (!err) {
+            console.log(result.insertId);
+            returnData["id"] = result.insertId;
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : add customer.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
+
