@@ -6,29 +6,24 @@ passport = require('passport'),
 var modelutil = require('./model-util');
 var dbUtil = require('./db-util');
 var ExpressBrute = require('express-brute');
-
-var store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production 
+var store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
 var bruteforce = new ExpressBrute(store, {
     minWait: 1000 * 30
 });
-
 // messages
 var msg1 = "Authentication Error. Invalid login credentials.";
 var msg2 = "Authorization Error. Access to this page forbidden.";
 var msg3 = "Invalid parameters or request body ";
-
 module.exports = function(app) {
-
     app.post('/loginCheck', bruteforce.prevent, passport.authenticate('local', {
         failureFlash: true
     }), function(req, res) {
         req.brute.reset(function() {
             res.send({
                 'user': req.user
-            }); // logged in, send them to the home page 
+            }); // logged in, send them to the home page
         });
     });
-
     app.get('/', function(req, res) {
         res.redirect('/rwnc');
     });
@@ -40,13 +35,10 @@ module.exports = function(app) {
         //console.log('/scribble',req.isAuthenticated());
         res.sendfile('./index.html');
     });
-
     app.get('/loggedin', function(req, res) {
         //console.log('/loggedin',req.isAuthenticated());
-
         res.send(req.isAuthenticated() ? req.user : '0');
     });
-
     app.get('/users', function(req, res) {
         dbUtil.getUsers().then(function(users) {
             res.send((JSON.stringify(users)).toString());
@@ -54,7 +46,6 @@ module.exports = function(app) {
             res.send(error)
         })
     });
-
     app.get('/alltypes', function(req, res) {
         dbUtil.getTypes().then(function(data) {
             res.send((JSON.stringify(data)).toString());
@@ -62,7 +53,6 @@ module.exports = function(app) {
             res.send(error)
         })
     });
-
     app.get('/allmaterials', function(req, res) {
         dbUtil.getMaterials().then(function(data) {
             res.send((JSON.stringify(data)).toString());
@@ -70,19 +60,15 @@ module.exports = function(app) {
             res.send(error)
         })
     });
-	
-	app.get('/status', function(req, res) {
+    app.get('/status', function(req, res) {
         var user_id = 1; // change it with user ID obtained from session
-        dbUtil.getStaus().then(function(data) {
-                res.statusCode = 200;
-                res.send(data);
-            }, function(err) {
-			res.send(err);
-		});
+        dbUtil.getStatus().then(function(data) {
+            res.statusCode = 200;
+            res.send(data);
+        }, function(err) {
+            res.send(err);
+        });
     });
-
-
-
     // post a new user
     // use data {"name":"***", "password":"***"}
     app.post('/user', function(req, res) {
@@ -92,8 +78,6 @@ module.exports = function(app) {
             res.send((JSON.stringify(id)).toString());
         });
     });
-
-
     // retrieve all recent orders, for home page view
     app.get('/recent_orders', function(req, res) {
         dbUtil.getRecentOrders().then(function(data) {
@@ -105,9 +89,7 @@ module.exports = function(app) {
         }, function(err) {
             res.send(err)
         });
-
     });
-
     // retrieve all recent received, for home page view
     app.get('/recent_received', function(req, res) {
         dbUtil.getRecentReceived().then(function(data) {
@@ -120,11 +102,8 @@ module.exports = function(app) {
             res.send(err)
         });
     });
-
-
     // retrieve all recent deliveries, for home page view
     app.get('/recent_deliveries', function(req, res) {
-
         dbUtil.getRecentDeliveries().then(function(data) {
             if (data != null) {
                 var data2 = modelutil.getRecentDeliveries(data);
@@ -134,9 +113,7 @@ module.exports = function(app) {
         }, function(err) {
             res.send(err)
         });
-
     });
-
     // retrieve all recent stocks below level, for home page view
     app.get('/recent_low_stocks', function(req, res) {
         dbUtil.getRecentLowStocks().then(function(data) {
@@ -148,9 +125,7 @@ module.exports = function(app) {
         }, function(err) {
             res.send(err)
         });
-
     });
-
     // retrieve all customer details
     app.get('/all_customers', function(req, res) {
         dbUtil.getAllCustomers().then(function(data) {
@@ -163,9 +138,8 @@ module.exports = function(app) {
             res.send(err)
         });
     });
-
     // POST a new customer details
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.post('/customer', function(req, res) {
         var user_id = 1; // change it with user ID obtained from session
         var customer_details = req.body;
@@ -179,10 +153,8 @@ module.exports = function(app) {
             res.send(err)
         });
     });
-
-
     // UPDATE a new customer details
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.put('/customer', function(req, res) {
         var user_id = 1; // change it with user ID obtained from session
         var customer_details = req.body;
@@ -201,10 +173,8 @@ module.exports = function(app) {
             });
         }
     });
-
-
     // UPDATE stock details
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.put('/stock', function(req, res) {
         var user_id = 1; // change it with user ID obtained from session
         var details = req.body;
@@ -223,87 +193,79 @@ module.exports = function(app) {
             });
         }
     });
-
-	// POST a new Received details
-    // use content-type 		 Application/json
-    app.post('/received', function(req, res) {
-        var receivedDetails = req.body;
-        var user_id = 1; // change it with user ID obtained from session
-
-        var returnData = {};
-        dbUtil.checkDuplicateAddAndFetchItem(user_id, receivedDetails).then(function(itemId) {
-            console.log(itemId);
-            receivedDetails['itemId'] = itemId;
-            dbUtil.insertReceived(user_id, receivedDetails).then(function(receivedId) {
-                async.parallel([
-		   function(callback){
-		            dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
-		                console.log(depositId);
-		                returnData['depositId'] = depositId;
-				callback(null, depositId);
-		            });
-		    },
-		    function(callback){
-		            dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
-		                console.log(stockId);
-		                returnData['stockId'] = stockId;
-				callback(null, stockId);
-		            });
-		   }
-                ], function(err, results) {
-                    returnData['itemId'] = itemId;
-                    returnData['receivedId'] = receivedId.receivedId;
-                    res.statusCode = 200;
-                    res.send(returnData);
-                });
-
-            });
-        });
-    });
-	
     // POST a new Received details
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.post('/received', function(req, res) {
         var receivedDetails = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         var returnData = {};
         dbUtil.checkDuplicateAddAndFetchItem(user_id, receivedDetails).then(function(itemId) {
             console.log(itemId);
             receivedDetails['itemId'] = itemId;
             dbUtil.insertReceived(user_id, receivedDetails).then(function(receivedId) {
                 async.parallel([
-		   function(callback){
-		            dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
-		                console.log(depositId);
-		                returnData['depositId'] = depositId;
-				callback(null, depositId);
-		            });
-		    },
-		    function(callback){
-		            dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
-		                console.log(stockId);
-		                returnData['stockId'] = stockId;
-				callback(null, stockId);
-		            });
-		   }
+                    function(callback) {
+                        dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
+                            console.log(depositId);
+                            returnData['depositId'] = depositId;
+                            callback(null, depositId);
+                        });
+                    },
+                    function(callback) {
+                        dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
+                            console.log(stockId);
+                            returnData['stockId'] = stockId;
+                            callback(null, stockId);
+                        });
+                    }
                 ], function(err, results) {
                     returnData['itemId'] = itemId;
                     returnData['receivedId'] = receivedId.receivedId;
                     res.statusCode = 200;
                     res.send(returnData);
                 });
-
             });
         });
     });
-	
-	// POST filters to get receive details
-    // use content-type 		 Application/json
+    // POST a new Received details
+    // use content-type Application/json
+    app.post('/received', function(req, res) {
+        var receivedDetails = req.body;
+        var user_id = 1; // change it with user ID obtained from session
+        var returnData = {};
+        dbUtil.checkDuplicateAddAndFetchItem(user_id, receivedDetails).then(function(itemId) {
+            console.log(itemId);
+            receivedDetails['itemId'] = itemId;
+            dbUtil.insertReceived(user_id, receivedDetails).then(function(receivedId) {
+                async.parallel([
+                    function(callback) {
+                        dbUtil.checkAndInsertDeposit(user_id, receivedDetails).then(function(depositId) {
+                            console.log(depositId);
+                            returnData['depositId'] = depositId;
+                            callback(null, depositId);
+                        });
+                    },
+                    function(callback) {
+                        dbUtil.checkAndInsertStock(user_id, receivedDetails).then(function(stockId) {
+                            console.log(stockId);
+                            returnData['stockId'] = stockId;
+                            callback(null, stockId);
+                        });
+                    }
+                ], function(err, results) {
+                    returnData['itemId'] = itemId;
+                    returnData['receivedId'] = receivedId.receivedId;
+                    res.statusCode = 200;
+                    res.send(returnData);
+                });
+            });
+        });
+    });
+    // POST filters to get receive details
+    // use content-type Application/json
     app.post('/receives', function(req, res) {
         var receiveFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         modelutil.receiveFilterModelToDB(receiveFilterModel).then(function(receiveFilterDB) {
             dbUtil.fetchReceive(receiveFilterDB).then(function(data) {
                 var receiveModel = modelutil.getReceive(data);
@@ -314,18 +276,15 @@ module.exports = function(app) {
             });
         });
     });
-
     app.get('/logout', function(req, res) {
         req.logOut();
         res.redirect('/rwnc');
     });
-
     // POST filters to receive stock details
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.post('/stock', function(req, res) {
         var stockFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         modelutil.stockFilterModelToDB(stockFilterModel).then(function(stockFilterDB) {
             if (stockFilterModel.hasOwnProperty('customerId')) {
                 dbUtil.fetchCustomerDeposit(stockFilterDB).then(function(data) {
@@ -346,14 +305,11 @@ module.exports = function(app) {
             }
         });
     });
-
-
     // POST filters to receive orders details
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.post('/orders', function(req, res) {
         var orderFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         modelutil.orderFilterModelToDB(orderFilterModel).then(function(orderFilterDB) {
             dbUtil.fetchOrders(orderFilterDB).then(function(data) {
                 var orderModel = modelutil.getOrders(data);
@@ -364,13 +320,11 @@ module.exports = function(app) {
             });
         });
     });
-
     // POST a new order
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.post('/order', function(req, res) {
         var orderDetails = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         dbUtil.checkDuplicateAddAndFetchItem(user_id, orderDetails).then(function(itemId) {
             console.log(itemId);
             orderDetails['itemId'] = itemId;
@@ -388,16 +342,15 @@ module.exports = function(app) {
                     res.send(returnData);
                 });
             }
-        },function(err){
-			  res.send(err);		
-		});
+        }, function(err) {
+            res.send(err);
+        });
     });
     // POST filters to retrieve productions details
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.post('/productions', function(req, res) {
         var productionFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         modelutil.productionFilterModelToDB(productionFilterModel).then(function(productionFilterDB) {
             dbUtil.fetchProductions(productionFilterDB).then(function(data) {
                 var productionModel = modelutil.getProductions(data);
@@ -408,14 +361,11 @@ module.exports = function(app) {
             });
         });
     });
-
-
     // POST a new production detail
-    // use content-type 		 Application/json
+    // use content-type Application/json
     app.post('/production', function(req, res) {
         var productionDetails = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         if (productionDetails.hasOwnProperty("productionId")) {
             // update the production details
             dbUtil.updateProduction(user_id, productionDetails).then(function(data) {
@@ -427,15 +377,12 @@ module.exports = function(app) {
             dbUtil.insertProduction(user_id, productionDetails).then(function(data) {
                 res.statusCode = 200;
                 res.send(data);
-
             });
         }
     });
-	
-	app.post('/addProductionItem', function(req, res) {
+    app.post('/addProductionItem', function(req, res) {
         var productionDetails = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         if (productionDetails.hasOwnProperty("productionId")) {
             // update the production details
             dbUtil.fetchProductionItems(user_id, productionDetails).then(function(data) {
@@ -443,19 +390,15 @@ module.exports = function(app) {
                 res.send(data);
             });
         } else {
-                res.statusCode = 200;
-                res.send(data);
-
-            });
+            res.statusCode = 200;
+            res.send(data);
         }
     });
-	
-	// POST a new production detail
-    // use content-type 		 Application/json
+    // POST a new production detail
+    // use content-type Application/json
     app.post('/productionItems', function(req, res) {
         var productionDetails = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
         if (productionDetails.hasOwnProperty("productionId")) {
             // update the production details
             dbUtil.fetchProductionItems(user_id, productionDetails).then(function(data) {
@@ -463,29 +406,23 @@ module.exports = function(app) {
                 res.send(data);
             });
         } else {
-                res.statusCode = 200;
-                res.send(data);
-
-            });
+            res.statusCode = 200;
+            res.send(data);
         }
     });
-	
-	app.post('/openorders', function(req, res) {
+    app.post('/openorders', function(req, res) {
         var orderFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
-
-		dbUtil.fetchOpenOrders().then(function(data) {
-			var orderModel = modelutil.getOrders(data);
-			res.statusCode = 200;
-			res.send(orderModel);
-		}, function(err) {
-			res.send(err);
-		});
+        dbUtil.fetchOpenOrders().then(function(data) {
+            var orderModel = modelutil.getOrders(data);
+            res.statusCode = 200;
+            res.send(orderModel);
+        }, function(err) {
+            res.send(err);
+        });
     });
-
     app.get('/logout', function(req, res) {
         req.logOut();
         res.redirect('/rwnc');
     });
-
 };
