@@ -360,14 +360,14 @@ exports.productionFilterModelToDB = function (productionFilterModel) {
 	if (productionFilterModel.hasOwnProperty('customerId')) {
 		returnArray.push("orders.customer_id = "+ productionFilterModel['customerId']);
 	}
-	if (productionFilterModel.hasOwnProperty('customerAlias')) {
-		returnArray.push("customer.alias = '"+ productionFilterModel['customerAlias']+"'");
-	}
 	if (productionFilterModel.hasOwnProperty('orderId')) {
 		returnArray.push("orders.order_id = "+ productionFilterModel['orderId']);
 	}
 	if (productionFilterModel.hasOwnProperty('productionStatus')) {
 		returnArray.push("production.status = '"+ productionFilterModel['productionStatus']+"'");
+	}
+	if (productionFilterModel.hasOwnProperty('itemType')) {
+		returnArray.push("item.type = '"+ productionFilterModel['itemType']+"'");
 	}
 	
 	deffered.resolve(returnArray);
@@ -384,6 +384,7 @@ exports.getProductions = function (productionDetails) {
         datum["customerAlias"] = obj.alias;
 
         datum["orderId"] = obj.order_id;
+		datum["parentOrderId"] = obj.parent_order_id;
         datum["itemId"] = obj.item_id;
 	if (obj.weight != null && obj.weight!=0)
         	datum["orderAmount"] = obj.weight + " kg";

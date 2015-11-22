@@ -662,7 +662,7 @@ exports.fetchOpenOrders = function() {
 exports.fetchProductions = function(productionFilterDB) {
     var deferred = q.defer();
     var result;
-    var queryString = 'select * from production, orders, item, customer where production.order_id = orders.order_id and item.item_id = orders.item_id and orders.customer_id = customer.customer_id ';
+    var queryString = 'select production.*,orders.order_id,orders.parent_order_id,opening,diameter,type,material,alias from production, orders, item, customer where production.order_id = orders.order_id and item.item_id = orders.item_id and orders.customer_id = customer.customer_id ';
 
     if (productionFilterDB != null && productionFilterDB.length > 0) {
         queryString = queryString + " and " + productionFilterDB.join(" and ");
