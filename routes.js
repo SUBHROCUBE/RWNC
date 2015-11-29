@@ -325,26 +325,41 @@ module.exports = function(app) {
     app.post('/order', function(req, res) {
         var orderDetails = req.body;
         var user_id = 1; // change it with user ID obtained from session
-        dbUtil.checkDuplicateAddAndFetchItem(user_id, orderDetails).then(function(itemId) {
-            console.log(itemId);
-            orderDetails['itemId'] = itemId;
-            if ((!orderDetails.hasOwnProperty("parentOrderId")) || orderDetails["parentOrderId"] == null) {
-                dbUtil.fetchNextParentOrderId().then(function(parentOrderId) {
-                    orderDetails["parentOrderId"] = parentOrderId;
-                    dbUtil.insertOrder(user_id, orderDetails).then(function(returnData) {
-                        res.statusCode = 200;
-                        res.send(returnData);
-                    });
-                });
-            } else {
-                dbUtil.insertOrder(user_id, orderDetails).then(function(returnData) {
-                    res.statusCode = 200;
-                    res.send(returnData);
-                });
-            }
-        }, function(err) {
-            res.send(err);
-        });
+	modelutil.itemFilterModelToDB(orderDetails).then(function(orderFilterDB) {
+		dbUtil.checkDuplicateAddAndFetchItem(user_id, orderDetails, orderFilterDB).then(function(itemId) {
+		    console.log(itemId);
+		    orderDetails['itemId'] = itemId;
+
+		    if ((!orderDetails.hasOwnProperty("parentOrderId")) || orderDetails["parentOrderId"] == null) {
+		        dbUtil.fetchNextParentOrderId().then(function(parentOrderId) {
+		            orderDetails["parentOrderId"] = parentOrderId;
+		            dbUtil.insertOrder(user_id, orderDetails).then(function(returnData) {
+		                res.statusCode = 200;
+		                res.send(returnData);
+		            });
+		        });
+		    } else {
+			if ((!orderDetails.hasOwnProperty("orderId")) || orderDetails["orderId"] == null) {
+				console.log("Going for Insert");
+				dbUtil.insertOrder(user_id, orderDetails).then(function(returnData) {
+				    res.statusCode = 200;
+				    res.send(returnData);
+				});
+			}
+			else
+			{
+				console.log("Going for Update");
+				dbUtil.updateOrder(user_id, orderDetails).then(function(returnData) {
+				    res.statusCode = 200;
+				    res.send(returnData);
+				});
+			}
+		    }
+	   
+        	}, function(err) {
+        	    res.send(err);
+        	});
+	});
     });
     // POST filters to retrieve productions details
     // use content-type Application/json

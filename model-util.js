@@ -157,10 +157,51 @@ exports.stockFilterModelToDB = function (stockFilterModel) {
 	return deffered.promise;
 };
 
+exports.itemFilterModelToDB = function (itemFilterModel) {
+	var deffered = q.defer();
+	var returnArray=[];
+	if (itemFilterModel.hasOwnProperty('itemOpening')) {
+		returnArray.push("item.opening = "+ itemFilterModel['itemOpening']);
+	}
+	if (itemFilterModel.hasOwnProperty('itemDiameter')) {
+		returnArray.push("item.diameter = "+ itemFilterModel['itemDiameter']);
+	}
+	if (itemFilterModel.hasOwnProperty('itemLength')) {
+		returnArray.push("item.length = "+ itemFilterModel['itemLength']);
+	}
+	if (itemFilterModel.hasOwnProperty('itemWidth')) {
+		returnArray.push("item.width = "+ itemFilterModel['itemWidth']);
+	}
+	if (itemFilterModel.hasOwnProperty('itemMaterial')) {
+		returnArray.push("item.material = '"+ itemFilterModel['itemMaterial']+"'");
+	}
+	if (itemFilterModel.hasOwnProperty('itemType')) {
+		returnArray.push("item.type = '"+ itemFilterModel['itemType']+"'");
+	}
+	if (itemFilterModel.hasOwnProperty('itemRawReady')) {
+		returnArray.push("item.raw_ready = '"+ itemFilterModel['itemRawReady']+"'");
+	}
+	if (itemFilterModel.hasOwnProperty('itemClamped') && itemFilterModel['itemClamped'] != null) {
+		returnArray.push("item.is_clamp = "+ itemFilterModel['itemClamped']);
+	}
+	if (itemFilterModel.hasOwnProperty('itemClampThickness')) {
+		returnArray.push("item.c_thickness = "+ itemFilterModel['itemClampThickness']);
+	}
+	if (itemFilterModel.hasOwnProperty('itemClampPosition')) {
+		returnArray.push("item.c_pos = "+ itemFilterModel['itemClampPosition']);
+	}
+	if (itemFilterModel.hasOwnProperty('itemClampLength')) {
+		returnArray.push("item.c_length = "+ itemFilterModel['itemClampLength']);
+	}
+
+	deffered.resolve(returnArray);
+	return deffered.promise;
+};
+
 exports.orderFilterModelToDB = function (orderFilterModel) {
 	var deffered = q.defer();
 	var returnArray=[];
-	if (orderFilterModel.hasOwnProperty('parentOrderId')) {
+	if (orderFilterModel.hasOwnProperty('parentOrderId') && orderFilterModel['parentOrderId'] != null) {
 		returnArray.push("orders.parent_order_id = "+ orderFilterModel['parentOrderId']);
 	}
 	if (orderFilterModel.hasOwnProperty('customerId')) {
@@ -187,7 +228,7 @@ exports.orderFilterModelToDB = function (orderFilterModel) {
 	if (orderFilterModel.hasOwnProperty('isRawReady')) {
 		returnArray.push("item.raw_ready = '"+ orderFilterModel['isRawReady']+"'");
 	}
-	if (orderFilterModel.hasOwnProperty('isClamped')) {
+	if (orderFilterModel.hasOwnProperty('isClamped') && orderFilterModel['isClamped'] != null) {
 		returnArray.push("item.is_clamp = "+ orderFilterModel['isClamped']);
 	}
 	if (orderFilterModel.hasOwnProperty('clampThickness')) {
@@ -289,6 +330,7 @@ exports.getOrders = function (orderDetails) {
 		datum["parentOrderId"] = obj.parent_order_id;
         datum["orderId"] = obj.order_id;
         datum["itemId"] = obj.item_id;
+	datum["customerId"] = obj.customer_id;
 	if (obj.weight != null && obj.weight!=0)
         	datum["orderAmount"] = obj.weight + " kg";
 	else
@@ -296,28 +338,28 @@ exports.getOrders = function (orderDetails) {
 
         datum["orderRate"] = obj.rate;
         datum["orderDate"] = obj.order_date;
-        datum["deliveryDate"] = obj.delivery_date;
-        datum["stockProvided"] = obj.stock_provided;
-        datum["status"] = obj.status;
+        datum["orderDeliveryDate"] = obj.delivery_date;
+        datum["orderIsStockProvided"] = obj.stock_provided;
+        datum["orderStatus"] = obj.status;
         datum["orderQuantity"] = obj.quantity;
         datum["orderQuantityCompleted"] = obj.quantity_completed;
         datum["orderQuantityInProduction"] = obj.quantity_in_production;
         datum["orderQuantityRemaining"] = obj.quantity - obj.quantity_completed - obj.quantity_in_production;
 	
-        datum["opening"] = obj.opening;
-        datum["diameter"] = obj.diameter;
-        datum["length"] = obj.length;
-        datum["width"] = obj.width;
-        datum["type"] = obj.type;
-        datum["material"] = obj.material;
-        datum["isRawReady"] = obj.raw_ready;
-        datum["description"] = obj.description;
-        datum["isClamp"] = obj.is_clamp;
-        datum["clampPosition"] = obj.c_pos;
-        datum["clampLength"] = obj.c_length;
-        datum["clampThickness"] = obj.c_thickness;
-        datum["clampDescription"] = obj.c_desc;
-        datum["threshold"] = obj.threshold;
+        datum["itemOpening"] = obj.opening;
+        datum["itemDiameter"] = obj.diameter;
+        datum["itemLength"] = obj.length;
+        datum["itemWidth"] = obj.width;
+        datum["itemType"] = obj.type;
+        datum["itemMaterial"] = obj.material;
+        datum["itemRawReady"] = obj.raw_ready;
+        datum["itemDescription"] = obj.description;
+        datum["itemIsClamped"] = obj.is_clamp;
+        datum["itemClampPosition"] = obj.c_pos;
+        datum["itemClampLength"] = obj.c_length;
+        datum["itemClampThickness"] = obj.c_thickness;
+        datum["itemClampDescription"] = obj.c_desc;
+        datum["itemThreshold"] = obj.threshold;
         returnData.push(datum);
     });
     return returnData;

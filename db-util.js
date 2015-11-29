@@ -286,7 +286,37 @@ exports.updateStock = function(user_id, data) {
 };
 
 
+checkDuplicateItem = function(itemToCheck) {
+    	var deferred = q.defer();
+        var query = 'select * from item ';
 
+	if (itemToCheck != null && itemToCheck.length > 0) {
+	        query = query + " where " + itemToCheck.join(" and ");
+    	}
+
+        console.log(query);
+        connection.query(query, function(err, rows, fields) {
+            if (!err) {
+                if (rows.length == 1) {
+                    console.log('Item found : itemToCheck : single row returned');
+                    deferred.resolve(rows[0].item_id);
+                } else if (rows.length > 1) {
+                    console.log('Error while performing Query : itemToCheck : multiple rows returned');
+                    deferred.resolve(rows[0].item_id);
+                } else {
+                    console.log('Item not found : itemToCheck');
+                    deferred.resolve(-1);
+                }
+            } else {
+                console.log('Error while performing Query : itemToCheck.');
+                deferred.reject(err);
+            }
+        });
+    
+    return deferred.promise;
+}
+
+/*
 checkDuplicateItem = function(itemToCheck) {
     var deferred = q.defer();
     var raw_ready = itemToCheck["itemRawReady"];
@@ -298,6 +328,7 @@ checkDuplicateItem = function(itemToCheck) {
     }
     if (raw_ready == "raw") {
         var query = 'select * from item where raw_ready=? and  material=? and type=? and diameter=?';
+	
         var inserts = [raw_ready, material, type, diameter];
         query = mysql.format(query, inserts);
         console.log(query);
@@ -334,6 +365,7 @@ checkDuplicateItem = function(itemToCheck) {
                     deferred.resolve(rows[0].item_id);
                 } else {
                     console.log('Item not found : itemToCheck');
+		    console.log("Hello");
                     deferred.resolve(-1);
                 }
             } else {
@@ -344,6 +376,7 @@ checkDuplicateItem = function(itemToCheck) {
     }
     return deferred.promise;
 }
+*/
 
 // insert a new item
 insertItem = function(user_id, data) {
@@ -366,22 +399,24 @@ insertItem = function(user_id, data) {
     return deferred.promise;
 };
 
-exports.checkDuplicateAddAndFetchItem = function(user_id, data) {
+exports.checkDuplicateAddAndFetchItem = function(user_id, itemJson, filterJson) {
+console.log("itemJson");
+console.log(itemJson);
+console.log("filterJson");
+console.log(filterJson);
     var deferred = q.defer();
-    checkDuplicateItem(data).then(function(err,itemId) {
-		if(!err){
-			if (itemId == -1) {
-				insertItem(user_id, data).then(function(itemId2) {
-					deferred.resolve(itemId2);
-				});
-			} else {
-				deferred.resolve(itemId);
-			}
-		}else {
-            console.log('Error while resolving item id');
-            deferred.reject(err);
-        }
-    });
+    checkDuplicateItem(filterJson).then(function(itemId) {
+        if (itemId == -1) {
+            insertItem(user_id, itemJson).then(function(itemId2) {
+                deferred.resolve(itemId2);
+            });
+	    } else {
+		  deferred.resolve(itemId);
+	    }            
+    },function(err){
+	    console.log('Error while resolving item id');
+        deferred.reject(err);
+	});
     return deferred.promise;
 };
 
@@ -601,6 +636,31 @@ console.log(data.parentOrderId);
     var query = 'insert into orders (parent_order_id, customer_id, item_id, quantity, weight, rate, order_date, cb) values (?,?,?,?,?,?, now(),?)';
     var inserts = [data["parentOrderId"],data["customerId"], data["itemId"], data["orderQuantity"], data["orderWeight"], data["orderRate"], user_id];
     query = mysql.format(query, inserts);
+    console.log(query);
+    connection.query(query, function(err, result) {
+        if (!err) {
+            console.log(result.insertId);
+            returnData["orderId"] = result.insertId;
+	    returnData["parentOrderId"] = data["parentOrderId"];
+            deferred.resolve(returnData);
+        } else {
+            console.log('Error while performing Query : add Order.');
+            deferred.reject(err)
+        }
+    });
+    return deferred.promise;
+};
+
+// insert a new Order
+exports.updateOrder = function(user_id, data) {
+    var deferred = q.defer();
+    var returnData = {};
+	console.log(data);
+	console.log(data.parentOrderId);
+	console.log(data.orderId);
+    var query = 'update orders set customer_id = ?, item_id=?, quantity=?, weight=?, rate=?, delivery_date=?, ub=? where order_id=?';
+    var updates = [data["customerId"], data["itemId"], data["orderQuantity"], data["orderWeight"], data["orderRate"], data["orderDeliveryDate"],user_id,data["orderId"]];
+    query = mysql.format(query, updates);
     console.log(query);
     connection.query(query, function(err, result) {
         if (!err) {
