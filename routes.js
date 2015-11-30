@@ -286,6 +286,7 @@ module.exports = function(app) {
         var stockFilterModel = req.body;
         var user_id = 1; // change it with user ID obtained from session
         modelutil.stockFilterModelToDB(stockFilterModel).then(function(stockFilterDB) {
+			console.log(stockFilterModel);
             if (stockFilterModel.hasOwnProperty('customerId')) {
                 dbUtil.fetchCustomerDeposit(stockFilterDB).then(function(data) {
                     var depositModel = modelutil.getDeposit(data);

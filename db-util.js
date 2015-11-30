@@ -3,7 +3,7 @@ var q = require('q');
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'rwnc123',
+    password: 'admin',
     database: 'rwncv1'
 });
 // get all user names
@@ -268,8 +268,9 @@ exports.updateCustomer = function(user_id, data) {
 exports.updateStock = function(user_id, data) {
     var deferred = q.defer();
     var returnData = {};
+	console.log(data);
     var query = 'update stock set quantity=?, weight = ?, uo=now(), ub = ? where stock_id=?';
-    var updates = [data["quantity"], data["weight"], user_id, data["stockId"]];
+    var updates = [parseInt(data["stockQuantity"]), parseFloat(data["stockWeight"]), user_id, data["stockId"]];
     query = mysql.format(query, updates);
     console.log(query);
     connection.query(query, function(err, result) {
@@ -579,11 +580,12 @@ exports.fetchCustomerDeposit = function(stockFilterDB) {
 
 // fetch RWNC stock based upon passed filters
 exports.fetchRwncStock = function(stockFilterDB) {
+console.log(stockFilterDB);
     var deferred = q.defer();
     var result;
     var queryString = 'select * from stock, item  where item.item_id = stock.item_id ';
-    if (stockFilterDB != null && stockFilterDB.size > 0) {
-        query = query + " and " + stockFilterDB.join(" and ");
+    if (stockFilterDB != null && stockFilterDB.length > 0) {
+        queryString = queryString + " and " + stockFilterDB.join(" and ");
     }
     console.log(queryString);
     connection.query(queryString, function(err, rows, fields) {

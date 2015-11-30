@@ -116,6 +116,7 @@ exports.getAllCustomers = function(data) {
 
 exports.stockFilterModelToDB = function (stockFilterModel) {
 	var deffered = q.defer();
+	console.log(stockFilterModel);
 	var returnArray=[];
 	if (stockFilterModel.hasOwnProperty('customerId')) {
 		returnArray.push("customer.customer_id = "+ stockFilterModel['customerId']);
@@ -133,26 +134,27 @@ exports.stockFilterModelToDB = function (stockFilterModel) {
 		returnArray.push("item.width = "+ stockFilterModel['itemWidth']);
 	}
 	if (stockFilterModel.hasOwnProperty('itemMaterial')) {
-		returnArray.push("item.material = "+ stockFilterModel['itemMaterial']);
+		returnArray.push("item.material = '"+ stockFilterModel['itemMaterial']+"'");
 	}
 	if (stockFilterModel.hasOwnProperty('itemType')) {
-		returnArray.push("item.type = "+ stockFilterModel['itemType']);
+		returnArray.push("item.type = '"+ stockFilterModel['itemType']+"'");
 	}
 	if (stockFilterModel.hasOwnProperty('itemThickness')) {
 		returnArray.push("item.thickness = "+ stockFilterModel['itemThickness']);
 	}
-	if (stockFilterModel.hasOwnProperty('isRawReady')) {
-		returnArray.push("item.raw_ready = "+ stockFilterModel['isRawReady']);
+	if (stockFilterModel.hasOwnProperty('itemRawReady')) {
+		returnArray.push("item.raw_ready = '"+ stockFilterModel['itemRawReady']+"'");
 	}
-	if (stockFilterModel.hasOwnProperty('isClamped')) {
-		returnArray.push("item.is_clamp = "+ stockFilterModel['isClamped']);
+	if (stockFilterModel.hasOwnProperty('itemIsClamped')) {
+		returnArray.push("item.is_clamp = "+ stockFilterModel['itemIsClamped']);
 	}
-	if (stockFilterModel.hasOwnProperty('clampThickness')) {
-		returnArray.push("item.c_thickness = "+ stockFilterModel['clampThickness']);
+	if (stockFilterModel.hasOwnProperty('itemClampThickness')) {
+		returnArray.push("item.c_thickness = "+ stockFilterModel['itemClampThickness']);
 	}
-	if (stockFilterModel.hasOwnProperty('stockAddedFrom') && stockFilterModel.hasOwnProperty('stockAddedTo')) {
-		returnArray.push("stock.co between '"+ stockFilterModel['stockAddedFrom'] + "' and '"+ stockFilterModel['stockAddedTo']+"'");
+	if (stockFilterModel.hasOwnProperty('stockDateFrom') && stockFilterModel.hasOwnProperty('stockDateTo')) {
+		returnArray.push("stock.co between '"+ stockFilterModel['stockDateFrom'] + "' and '"+ stockFilterModel['stockDateTo']+"'");
 	}
+	console.log(returnArray);
 	deffered.resolve(returnArray);
 	return deffered.promise;
 };
@@ -266,27 +268,30 @@ exports.getDeposit = function (depositDetails) {
         var datum = {};
         datum["depositId"] = obj.deposit_id;
         datum["itemId"] = obj.item_id;
-	if (obj.weight != null && obj.weight!=0)
-        	datum["stockAmount"] = obj.weight + " kg";
-	else
-		datum["stockAmount"] = obj.quantity;
-        datum["customerId"] = obj.customer_id;
-        datum["customerAlias"] = obj.alias;
-        datum["customerName"] = obj.name;
-        datum["opening"] = obj.opening;
-        datum["diameter"] = obj.diameter;
-        datum["length"] = obj.length;
-        datum["width"] = obj.width;
-        datum["type"] = obj.type;
-        datum["material"] = obj.material;
-        datum["isRawReady"] = obj.raw_ready;
-        datum["description"] = obj.description;
-        datum["isClamp"] = obj.is_clamp;
-        datum["clampPosition"] = obj.c_pos;
-        datum["clampLength"] = obj.c_length;
-        datum["clampThickness"] = obj.c_thickness;
-        datum["clampDescription"] = obj.c_desc;
-        datum["threshold"] = obj.threshold;
+		datum["stockWeight"] = obj.weight;
+        datum["stockQuantity"] = obj.quantity;
+		if (obj.weight != null && obj.weight!=0)
+			datum["stockAmount"] = obj.weight + " kg";
+		else
+			datum["stockAmount"] = obj.quantity + " pcs ";
+        datum["itemOpening"] = obj.opening;
+        datum["itemDiameter"] = obj.diameter;
+        datum["itemLength"] = obj.length;
+        datum["itemWidth"] = obj.width;
+        datum["itemType"] = obj.type;
+        datum["itemMaterial"] = obj.material;
+        datum["itemRawReady"] = obj.raw_ready;
+        datum["itemDescription"] = obj.description;
+        datum["itemIsClamped"] = obj.is_clamp ;
+		if (obj.is_clamp==0)
+			datum["itemClampStatus"] = "Not Clamped";
+		else
+			datum["itemClampStatus"] = "Clamped";
+        datum["itemClampPosition"] = obj.c_pos;
+        datum["itemClampLength"] = obj.c_length;
+        datum["itemClampThickness"] = obj.c_thickness;
+        datum["itemClampDescription"] = obj.c_desc;
+        datum["itemThreshold"] = obj.threshold;
         returnData.push(datum);
     });
     return returnData;
@@ -298,24 +303,30 @@ exports.getStock = function (stockDetails) {
         var datum = {};
         datum["stockId"] = obj.stock_id;
         datum["itemId"] = obj.item_id;
-	if (obj.weight != null && obj.weight!=0)
-        	datum["stockAmount"] = obj.weight + " kg";
-	else
-		datum["stockAmount"] = obj.quantity;
-        datum["opening"] = obj.opening;
-        datum["diameter"] = obj.diameter;
-        datum["length"] = obj.length;
-        datum["width"] = obj.width;
-        datum["type"] = obj.type;
-        datum["material"] = obj.material;
-        datum["isRawReady"] = obj.raw_ready;
-        datum["description"] = obj.description;
-        datum["isClamp"] = obj.is_clamp;
-        datum["clampPosition"] = obj.c_pos;
-        datum["clampLength"] = obj.c_length;
-        datum["clampThickness"] = obj.c_thickness;
-        datum["clampDescription"] = obj.c_desc;
-        datum["threshold"] = obj.threshold;
+		datum["stockWeight"] = obj.weight;
+        datum["stockQuantity"] = obj.quantity;
+		if (obj.weight != null && obj.weight!=0)
+			datum["stockAmount"] = obj.weight + " kg";
+		else
+			datum["stockAmount"] = obj.quantity + " pcs ";
+        datum["itemOpening"] = obj.opening;
+        datum["itemDiameter"] = obj.diameter;
+        datum["itemLength"] = obj.length;
+        datum["itemWidth"] = obj.width;
+        datum["itemType"] = obj.type;
+        datum["itemMaterial"] = obj.material;
+        datum["itemRawReady"] = obj.raw_ready;
+        datum["itemDescription"] = obj.description;
+        datum["itemIsClamped"] = obj.is_clamp;
+		if (obj.is_clamp==0)
+			datum["itemClampStatus"] = "Not Clamped";
+		else
+			datum["itemClampStatus"] = "Clamped";
+        datum["itemClampPosition"] = obj.c_pos;
+        datum["itemClampLength"] = obj.c_length;
+        datum["itemClampThickness"] = obj.c_thickness;
+        datum["itemClampDescription"] = obj.c_desc;
+        datum["itemThreshold"] = obj.threshold;
         returnData.push(datum);
     });
     return returnData;
